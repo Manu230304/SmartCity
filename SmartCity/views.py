@@ -1,12 +1,41 @@
 from contextlib import nullcontext
+from operator import truediv
 
 from django.contrib.auth.hashers import make_password, check_password
 from django.shortcuts import render
+from django.template.defaultfilters import length
 
 from SmartCity.models import *
 
 
 # Create your views here.
+
+def controlloPassword(password):
+
+    caratteriSpeciali = ['*', '$', '!' '#']
+
+    numero = False
+    carattereSpeciale = False
+    letteraMinuscola = False
+    letteraMaiuscola = False
+    lunghezza = False
+
+    for lettera in password:
+        if 'a' <= lettera <= 'z':
+            letteraMinuscola = True
+        if 'A' <= lettera <= 'Z':
+            letteraMaiuscola = True
+        if '0' <= lettera <= '9':
+            numero = True
+        if lettera in caratteriSpeciali:
+            carattereSpeciale = True
+        if length(password) >= 12:
+            lunghezza = True
+
+    if numero and  carattereSpeciale and letteraMinuscola and lunghezza and letteraMaiuscola:
+        return True
+    else:
+        return False
 
 def registrazione(request):
 
@@ -18,6 +47,7 @@ def registrazione(request):
         'livelli': Urbanista.Livelli,
         'qualifiche': Urbanista.QUALIFICHE_URBANISTA,
         'occupazioni': Cittadino.OCCUPAZIONI,
+        'specializzazioni': TecnicoComunale.SPECIALIZZAZIONI_TECNICO
     }
 
     if request.method == 'POST':
@@ -34,6 +64,9 @@ def registrazione(request):
             context['error_message'] = "Tutti i campi devono essere compilati."
             return render(request, 'registrazione.html', context)
 
+        if not controlloPassword(password):
+            context['error_message'] = "La password deve essere lunga almeno 12 caratteri e contenere almeno: una lettera maiuscola, una minuscola, un numero e un carattere speciale."
+            return render(request, 'registrazione.html', context)
 
         if Utente.objects.filter(email=email).exists():
             context['error_message'] = "Utente già registrato"
@@ -42,6 +75,8 @@ def registrazione(request):
         if (password != passwordConfermata):
             context['error_message'] = "Le due password non coincidono"
             return render(request, 'registrazione.html', context)
+
+
 
         elif(ruolo == 'cittadino'):
 
@@ -79,6 +114,28 @@ def registrazione(request):
             urbanista.save()
             context['success'] = "Registrazione avvenuta con successo"
             return render(request, 'login.html', context)
+
+        elif(ruolo == 'tecnico'):
+
+            specializzazione = request.POST.get('specializzazione')
+            numero_matricola = request.POST.get('matricola')
+            emailUfficio = request.POST.get('emailUfficio')
+            telefono_ufficio = request.POST.get('telefono')
+
+            hashed_password = make_password(password)
+            utente = Utente(nome=nome, cognome=cognome,email=email, password=hashed_password, codice_postale=municipalita,  ruolo=ruolo)
+            utente.save()
+
+            if not telefono_ufficio:
+                tecnico = TecnicoComunale(utente = utente,specializzazione = specializzazione, numero_matricola=numero_matricola, email_ufficio= emailUfficio)
+                tecnico.save()
+                context['success'] = "Registrazione avvenuta con successo"
+                return render(request, 'login.html', context)
+            else:
+                tecnico = TecnicoComunale(utente=utente, specializzazione=specializzazione, numero_matricola=numero_matricola, email_ufficio=emailUfficio, telefono_ufficio=telefono_ufficio)
+                tecnico.save()
+                context['success'] = "Registrazione avvenuta con successo"
+                return render(request, 'login.html', context)
 
     return render(request, 'registrazione.html', context)
 

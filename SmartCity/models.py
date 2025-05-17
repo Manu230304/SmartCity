@@ -100,9 +100,24 @@ class Urbanista(models.Model):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 class TecnicoComunale(models.Model):
+
+    SPECIALIZZAZIONI_TECNICO = [
+        ("manutenzione", "Manutenzione Infrastrutturale"),
+        ("energia", "Gestione Energetica"),
+        ("ambiente", "Gestione Rifiuti e Ambiente"),
+        ("qualita", "Controllo Qualità di Aria e Acqua"),
+        ("smart_city", "Sistemi Smart City"),
+        ("edilizia_pubblica", "Tecnico per l’Edilizia Pubblica"),
+        ("informatica", "Tecnologie Informatiche"),
+        ("videosorveglianza", "Sicurezza e Videosorveglianza"),
+        ("mobilita", "Mobilità e Trasporti"),
+        ("emergenze", "Tecnico per l’Emergenza e Protezione Civile"),
+    ]
+
     utente = models.OneToOneField(Utente, on_delete=models.CASCADE, primary_key=True, related_name='tecnicocomunale')
-    specializzazione = models.CharField(max_length=155)
+    specializzazione = models.CharField(max_length=155, choices=SPECIALIZZAZIONI_TECNICO)
     numero_matricola = models.CharField(max_length=16)
     email_ufficio = models.EmailField()
     telefono_ufficio = models.CharField(max_length=20, null=True)

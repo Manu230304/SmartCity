@@ -1,85 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Registrazione</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
- <style>
-    /* Layout del contenitore principale */
-    .container-main {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        background-color: #0e1d30; /* Blu notte */
-        gap: 50px;
-        padding: 20px;
-    }
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
+    <style>
+        /* Layout del contenitore principale */
+        .container-main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0e1d30; /* Blu notte */
+            gap: 50px;
+            padding: 20px;
+        }
 
-    /* Stile del titolo */
-    .h1 {
-        font-family: 'Poppins', sans-serif;
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #38BDF8; /* Azzurro brillante */
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        margin: 0;
-    }
+        /* Stile del titolo */
+        .h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #38BDF8; /* Azzurro brillante */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin: 0;
+        }
 
-    /* Pulsante principale */
-    .btn-primary {
-        background-color: #38BDF8; /* Azzurro brillante */
-        border-color: #38BDF8;
-        color: #0F172A; /* Testo scuro su sfondo chiaro */
-        width: 100%;
-        font-size: 16px;
-        padding: 10px;
-        transition: background-color 0.2s ease;
-    }
+        /* Pulsante principale */
+        .btn-primary {
+            background-color: #38BDF8; /* Azzurro brillante */
+            border-color: #38BDF8;
+            color: #0F172A; /* Testo scuro su sfondo chiaro */
+            width: 100%;
+            font-size: 16px;
+            padding: 10px;
+            transition: background-color 0.2s ease;
+        }
 
-    .btn-primary:hover {
-        background-color: #0EA5E9; /* Azzurro più intenso */
-        border-color: #0EA5E9;
-        color: #FFFFFF;
-    }
+        .btn-primary:hover {
+            background-color: #0EA5E9; /* Azzurro più intenso */
+            border-color: #0EA5E9;
+            color: #FFFFFF;
+        }
 
-    /* Form */
-    form {
-        background: #1E293B; /* Scuro ma non nero */
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        width: 100%;
-        max-width: 400px;
-    }
+        /* Form */
+        form {
+            background: #1E293B; /* Scuro ma non nero */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
 
-    .form-control {
-        font-size: 16px;
-        padding: 10px;
-        background-color: #0F172A;
-        color: #F8FAFC;
-        border: 1px solid #475569;
-    }
+        .form-control {
+            font-size: 16px;
+            padding: 10px;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            border: 1px solid #475569;
+        }
 
-    label {
-        font-size: 16px;
-        font-weight: 500;
-        color: #F8FAFC;
-    }
+        label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #F8FAFC;
+        }
 
-    select.form-control {
-        font-size: 16px;
-        padding: 8px;
-        height: auto;
-        background-color: #0F172A;
-        color: #F8FAFC;
-        border: 1px solid #475569;
-    }
-</style>
-
-
-
+        select.form-control {
+            font-size: 16px;
+            padding: 8px;
+            height: auto;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            border: 1px solid #475569;
+        }
+    </style>
 </head>
 <body>
     <!-- Contenitore principale -->
@@ -94,31 +91,31 @@
             <!-- Campo Nome -->
             <div class="form-group">
                 <label for="nome">Nome</label>
-                <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required>
+                <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required />
             </div>
 
             <!-- Campo Cognome -->
             <div class="form-group">
                 <label for="cognome">Cognome</label>
-                <input type="text" class="form-control" id="cognome" name="cognome" placeholder="Cognome" required>
+                <input type="text" class="form-control" id="cognome" name="cognome" placeholder="Cognome" required />
             </div>
 
             <!-- Campo Email -->
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required />
             </div>
 
             <!-- Campo Password -->
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required />
             </div>
 
             <!-- Campo Conferma Password -->
             <div class="form-group">
                 <label for="confirmPassword">Conferma Password</label>
-                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Conferma Password" required>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Conferma Password" required />
             </div>
 
             <!-- Campo Municipalità -->
@@ -127,7 +124,7 @@
                 <select id="inputState" name="codice_postale" class="form-control" required>
                     <option selected>Scegli</option>
                     {% for municipalita in lista_municipalita %}
-                        <option value="{{ municipalita.codice_postale }}">{{ municipalita.nome }}</option>
+                    <option value="{{ municipalita.codice_postale }}">{{ municipalita.nome }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -137,12 +134,12 @@
                 <select id="scegliRuolo" name="ruolo" class="form-control" required>
                     <option selected>Scegli</option>
                     {% for ruolo, valore in ruoli %}
-                        <option value="{{ ruolo}}">{{ valore }}</option>
+                    <option value="{{ ruolo }}">{{ valore }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-        <!-- Campi aggiuntivi per Urbanista, nascosti di default -->
+            <!-- Campi aggiuntivi per Urbanista, nascosti di default -->
             <div id="campiUrbanista" style="display:none;">
                 <div class="form-group">
                     <label for="urbanistaLivello">Livello</label>
@@ -154,7 +151,7 @@
                     </select>
                 </div>
 
-            <div class="form-group">
+                <div class="form-group">
                     <label for="urbanistaQualifica">Qualifica</label>
                     <select id="selectQualifica" name="qualifica" class="form-control" required>
                         <option selected> Scegli</option>
@@ -163,62 +160,85 @@
                         {% endfor %}
                     </select>
                 </div>
-
             </div>
 
-
-         <!-- Campi aggiuntivi per Cittadino, nascosti di default -->
+            <!-- Campi aggiuntivi per Cittadino, nascosti di default -->
             <div id="campiCittadino" style="display:none;">
                 <div class="form-group">
-                <label for="data_nascita">Data di Nascita</label>
-                <input type="date" class="form-control" id="data_nascita" name="dataNascita" placeholder="Inserisci la tua data di nascita" required>
-            </div>
+                    <label for="data_nascita">Data di Nascita</label>
+                    <input type="date" class="form-control" id="data_nascita" name="dataNascita" placeholder="Inserisci la tua data di nascita" required />
+                </div>
 
                 <div class="form-group">
-                <label for="Occupazione">Occupazione</label>
-                <select id="selectOccupazione" name="occupazione" class="form-control" required>
-                    <option selected> Scegli </option>
-                    {% for occupazione, valore in occupazioni %}
-                    <option value="{{ occupazione }}"> {{ valore }}</option>
-                    {% endfor %}
-                </select>
+                    <label for="Occupazione">Occupazione</label>
+                    <select id="selectOccupazione" name="occupazione" class="form-control" required>
+                        <option selected> Scegli </option>
+                        {% for occupazione, valore in occupazioni %}
+                        <option value="{{ occupazione }}"> {{ valore }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            </div>
                 <div class="form-group">
                     <label for="aggiornamenti">Vuoi ricevere aggiornameni tramite email? </label>
-                    <input type="checkbox" id="aggiornamentiEmail" name="aggiornamentiEmail">
+                    <input type="checkbox" id="aggiornamentiEmail" name="aggiornamentiEmail" />
                 </div>
             </div>
 
+            <!-- Campi aggiuntivi per Tecnico Comunale, nascosti di default -->
+            <div id="campiTecnico" style="display:none;">
+                <div class="form-group">
+                    <label for="specializzazione">Specializzazione</label>
+                    <select id="specializzazione" name="specializzazione" class="form-control" required>
+                        <option selected> Scegli </option>
+                        {% for specializzazione, valore in specializzazioni %}
+                        <option value="{{ specializzazione }}"> {{ valore }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
+                <div class="form-group">
+                    <label for="matricola">Numero Matricola</label>
+                    <input type="text" class="form-control" id="matricola" name="matricola" placeholder="Inserisci matricola..." required />
+                </div>
 
+                <div class="form-group">
+                    <label for="emailUfficio">Email Ufficio</label>
+                    <input type="email" class="form-control" id="emailUfficio" name="emailUfficio" placeholder="Inserisci email d'ufficio..." required />
+                </div>
+
+                <div class="form-group">
+                    <label for="telefonoUfficio">Telefono Ufficio</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="+39 347 123 4567" pattern="^\+39\s\d{3}\s\d{3}\s\d{4}$" title="Inserisci un numero nel formato +39 347 123 4567" />
+                </div>
+            </div> <!-- FINE campiTecnico -->
 
             <!-- Bottone di invio -->
             <button type="submit" class="btn btn-primary">Registrati</button>
-
+            <p class="text-center mt-4 text-light">
+                Hai già un account?
+                <a href="/login">Accedi</a>
+            </p>
             {% if error_message %}
-                <p style="color: red;">{{ error_message }}</p>
+            <p style="color: red;">{{ error_message }}</p>
             {% endif %}
 
             {% if success %}
-                <p style="color: green;">{{ success }}</p>
+            <p style="color: green;">{{ success }}</p>
             {% endif %}
-
         </form>
     </div>
 
-
-
-        <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             const ruoloSelect = document.getElementById('scegliRuolo');
             const campiUrbanista = document.getElementById('campiUrbanista');
             const campiCittadino = document.getElementById('campiCittadino');
+            const campiTecnico = document.getElementById('campiTecnico');
 
             function toggleCampiUrbanista() {
                 if (ruoloSelect.value === 'urbanista') {
                     campiUrbanista.style.display = 'block';
-                    // Rendi obbligatori i campi extra se vuoi
                     document.getElementById('selectLivello').required = true;
                     document.getElementById('selectQualifica').required = true;
                 } else {
@@ -228,31 +248,42 @@
                 }
             }
 
-            function toggleCampiCittadino(){
-
-                if(ruoloSelect.value === 'cittadino'){
+            function toggleCampiCittadino() {
+                if (ruoloSelect.value === 'cittadino') {
                     campiCittadino.style.display = 'block';
-
-                    document.getElementById('data_nascita').required = true
+                    document.getElementById('data_nascita').required = true;
                     document.getElementById('aggiornamentiEmail').required = false;
-
-                }
-
-                else {
+                } else {
                     campiCittadino.style.display = 'none';
                     document.getElementById('data_nascita').required = false;
                     document.getElementById('aggiornamentiEmail').required = false;
                 }
+            }
 
-
+            function toggleCampiTecnico() {
+                if (ruoloSelect.value === 'tecnico') {
+                    campiTecnico.style.display = 'block';
+                    document.getElementById('matricola').required = true;
+                    document.getElementById('specializzazione').required = true;
+                    document.getElementById('emailUfficio').required = true;
+                    document.getElementById('telefono').required = false;
+                } else {
+                    campiTecnico.style.display = 'none';
+                    document.getElementById('matricola').required = false;
+                    document.getElementById('specializzazione').required = false;
+                    document.getElementById('emailUfficio').required = false;
+                    document.getElementById('telefono').required = false;
+                }
             }
 
             ruoloSelect.addEventListener('change', toggleCampiUrbanista);
-             ruoloSelect.addEventListener('change', toggleCampiCittadino);
+            ruoloSelect.addEventListener('change', toggleCampiCittadino);
+            ruoloSelect.addEventListener('change', toggleCampiTecnico);
 
             // Inizializza lo stato all'apertura pagina (utile se fai reload con valori già selezionati)
             toggleCampiUrbanista();
             toggleCampiCittadino();
+            toggleCampiTecnico();
         });
     </script>
 </body>
