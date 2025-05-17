@@ -88,7 +88,7 @@
         <p class="h1">Registrazione</p>
 
         <!-- Form di registrazione -->
-        <form method="post" action="/registrazione">
+        <form method="post" action="registrazione">
             {% csrf_token %}
 
             <!-- Campo Nome -->
@@ -123,7 +123,7 @@
 
             <!-- Campo Municipalità -->
             <div class="form-group">
-                <label for="inputState">Municipalità</label>
+                <label for="inputState">Quartiere</label>
                 <select id="inputState" name="codice_postale" class="form-control" required>
                     <option selected>Scegli</option>
                     {% for municipalita in lista_municipalita %}
@@ -134,7 +134,7 @@
 
             <div class="form-group">
                 <label for="inputState">Ruolo</label>
-                <select id="inputState" name="ruolo" class="form-control" required>
+                <select id="scegliRuolo" name="ruolo" class="form-control" required>
                     <option selected>Scegli</option>
                     {% for ruolo, valore in ruoli %}
                         <option value="{{ ruolo}}">{{ valore }}</option>
@@ -142,18 +142,112 @@
                 </select>
             </div>
 
+        <!-- Campi aggiuntivi per Urbanista, nascosti di default -->
+            <div id="campiUrbanista" style="display:none;">
+                <div class="form-group">
+                    <label for="urbanistaLivello">Livello</label>
+                    <select id="selectLivello" name="livello" class="form-control" required>
+                        <option selected> Scegli</option>
+                        {% for livello, valore in livelli %}
+                        <option value="{{ livello }}"> {{ valore }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            <div class="form-group">
+                    <label for="urbanistaQualifica">Qualifica</label>
+                    <select id="selectQualifica" name="qualifica" class="form-control" required>
+                        <option selected> Scegli</option>
+                        {% for qualifica, valore in qualifiche %}
+                        <option value="{{ qualifica }}"> {{ valore }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+
+         <!-- Campi aggiuntivi per Cittadino, nascosti di default -->
+            <div id="campiCittadino" style="display:none;">
+                <div class="form-group">
+                <label for="data_nascita">Data di Nascita</label>
+                <input type="date" class="form-control" id="data_nascita" name="dataNascita" placeholder="Inserisci la tua data di nascita" required>
+            </div>
+
+                <div class="form-group">
+                <label for="Occupazione">Occupazione</label>
+                <select id="selectOccupazione" name="occupazione" class="form-control" required>
+                    <option selected> Scegli </option>
+                    {% for occupazione, valore in occupazioni %}
+                    <option value="{{ occupazione }}"> {{ valore }}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+                <div class="form-group">
+                    <label for="aggiornamenti">Vuoi ricevere aggiornameni tramite email? </label>
+                    <input type="checkbox" id="aggiornamentiEmail" name="aggiornamentiEmail">
+                </div>
+            </div>
+
+
+
+
             <!-- Bottone di invio -->
             <button type="submit" class="btn btn-primary">Registrati</button>
 
-         {% if error_message %}
-               <p style="color: red;">{{ error_message }}</p>
+            {% if error_message %}
+                <p style="color: red;">{{ error_message }}</p>
             {% endif %}
 
             {% if success %}
-               <p style="color: green;">{{ success }}</p>
+                <p style="color: green;">{{ success }}</p>
             {% endif %}
 
         </form>
     </div>
+
+
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ruoloSelect = document.getElementById('scegliRuolo');
+            const campiUrbanista = document.getElementById('campiUrbanista');
+            const campiCittadino = document.getElementById('campiCittadino');
+
+            function toggleCampiUrbanista() {
+                if (ruoloSelect.value === 'urbanista') {
+                    campiUrbanista.style.display = 'block';
+                    // Rendi obbligatori i campi extra se vuoi
+                    document.getElementById('selectLivello').required = true;
+                    document.getElementById('selectQualifica').required = true;
+                } else {
+                    campiUrbanista.style.display = 'none';
+                    document.getElementById('selectLivello').required = false;
+                    document.getElementById('selectQualifica').required = false;
+                }
+            }
+
+            function toggleCampiCittadino(){
+
+                if(ruoloSelect.value === 'cittadino'){
+                    campiCittadino.style.display = 'block';
+
+                    document.getElementById('data_nascita').required = true;
+                    document.getElementById('aggiornamentiEmail').required = false;
+
+                }
+
+
+            }
+
+            ruoloSelect.addEventListener('change', toggleCampiUrbanista);
+             ruoloSelect.addEventListener('change', toggleCampiCittadino);
+
+            // Inizializza lo stato all'apertura pagina (utile se fai reload con valori già selezionati)
+            toggleCampiUrbanista();
+            toggleCampiCittadino();
+        });
+    </script>
 </body>
 </html>

@@ -41,21 +41,60 @@ class Utente(models.Model):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class Cittadino(models.Model):
+
+    OCCUPAZIONI = [
+        ('studente', 'Studente'),
+        ('impiegato', 'Impiegato'),
+        ('libero_professionista', 'Libero Professionista'),
+        ('disoccupato', 'Disoccupato'),
+        ('pensionato', 'Pensionato'),
+        ('casalinga', 'Casalinga/o'),
+        ('altro', 'Altro'),
+    ]
+
+
+
+
     utente = models.OneToOneField(Utente, on_delete=models.CASCADE, primary_key=True, related_name='cittadino') # OneToOne crea una relazione 1 a 1. Quindi collego le specializzazioni alla tabella padre "Utente"
                                                                                                                 # Posso usare quindi per esempio: Cittadino.utente.email, Urbanista.utente.codice_postale ecc...
                                                                                                                 # Mettendo il related name posso anche fare Utente.cittadino ecc...
+
+    occupazione = models.CharField(max_length=70, choices=OCCUPAZIONI, default=OCCUPAZIONI[0])
     data_nascita = models.DateField()
-    data_registrazione = models.DateField()
-    numero_cellulare = models.CharField(max_length=20, null=True)
-    notifiche_sms = models.BooleanField(default=False, null=True)
+    data_registrazione = models.DateTimeField(auto_now_add=True)
+    notifiche_email = models.BooleanField(default=False, null=True)
     punteggio_attivita = models.IntegerField(default=0)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
 class Urbanista(models.Model):
-    utente = models.OneToOneField(Utente, on_delete=models.CASCADE, primary_key=True, related_name='urbanista')
-    tipo = models.CharField(max_length=100)
-    qualifica = models.CharField(max_length=120)
+
+    Livelli = [
+        ('junior','Junior'),
+        ('senior','Senior'),
+        ('esperto','Esperto'),
+
+    ]
+
+    QUALIFICHE_URBANISTA = [
+        ("laurea_triennale_urbanistica", "Laurea triennale in Urbanistica"),
+        ("laurea_magistrale_pianificazione", "Laurea magistrale in Pianificazione Territoriale"),
+        ("master_urbanistica", "Master in Urbanistica e Pianificazione Urbana"),
+        ("dottorato_scienze_urbanistiche", "Dottorato in Scienze Urbanistiche"),
+        ("abilitazione_professionale", "Abilitazione professionale all’esercizio della professione di Urbanista"),
+        ("certificazione_gis", "Certificazione in GIS (Geographic Information Systems)"),
+        ("corso_rigenerazione", "Corso di specializzazione in Rigenerazione Urbana"),
+        ("esperto_sostenibilita", "Esperto in Sostenibilità e Pianificazione Ambientale"),
+        ("esperto_mobilita", "Esperto in Mobilità Urbana e Trasporti"),
+        ("certificazione_pmp", "Certificazione in Project Management (es. PMP)"),
+        ("esperto_politiche_abitative", "Esperto in Politiche Abitative e Sociali"),
+        ("esperto_normativa", "Esperto in Normativa Urbanistica e Edilizia"),
+
+        ]
+
+    utente = models.OneToOneField(Utente, on_delete=models.CASCADE, primary_key=True, related_name='profilo_urbanista')
+    tipo = models.CharField(max_length=100, choices=Livelli)
+    qualifica = models.CharField(max_length=120, choices=QUALIFICHE_URBANISTA)
     bio = models.TextField()
     valutazione_media = models.FloatField(default=0)
 
