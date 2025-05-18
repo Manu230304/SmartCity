@@ -1,10 +1,12 @@
 from contextlib import nullcontext
 from operator import truediv
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password, check_password
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.defaultfilters import length
 
+import ProgettoBasi
 from SmartCity.models import *
 
 
@@ -12,7 +14,7 @@ from SmartCity.models import *
 
 def controlloPassword(password):
 
-    caratteriSpeciali = ['*', '$', '!' '#']
+    caratteriSpeciali = ['*', '$', '!','#']
 
     numero = False
     carattereSpeciale = False
@@ -36,6 +38,73 @@ def controlloPassword(password):
         return True
     else:
         return False
+
+def aggiungi_progetto(request):
+
+    email = request.session.get('utente_email')
+
+    if not email:
+        return redirect('login')
+    lista_municipalita = Municipalita.objects.all()
+
+    context = {
+        'lista_municipalita': lista_municipalita,
+        'stati': Progetto.STATO
+    }
+
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        descrizione = request.POST.get('descrizione')
+        budget = request.POST.get('budget')
+        data_inizio = request.POST.get('data_inizio')
+        data_fine = request.POST.get('data_fine')
+        municipalita_codice_postale = request.POST.get('municipalita')
+        municipalita = Municipalita.objects.get(codice_postale=municipalita_codice_postale)
+
+
+        progetto = Progetto(nome = nome, descrizione =descrizione, budget=budget, data_inizio=data_inizio, codice_postale=municipalita, urbanista_id=email)
+        progetto.save()
+        print("Progetto Aggiunto")
+
+    return render(request, 'aggiungi_progetto.html', context)
+
+
+
+
+def logout_view(request):
+    request.session.flush()  # Cancella tutta la sessione
+    return redirect('login')  # Torna alla pagina di login
+def home_cittadino(request):
+    email = request.session.get('utente_email')
+
+    if not email:
+        return redirect('login')
+
+    utente = Utente.objects.get(email=email)
+    cittadino = Cittadino.objects.get(utente=utente)
+
+    context = {
+        'utente': utente,
+        'cittadino': cittadino
+    }
+    return render(request, 'home_cittadino.html', context)
+
+def home_urbanista(request):
+    email = request.session.get('utente_email')
+    if not email:
+        return redirect('login')
+
+
+    utente = Utente.objects.get(email=email)
+    urbanista = Urbanista.objects.get(utente=utente)
+    lista_progetti = Progetto.objects.filter(urbanista=urbanista)
+    context = {
+        'lista_progetti': lista_progetti,
+        'utente': utente,
+        'urbanista': urbanista
+    }
+
+    return render(request, 'home_urbanista.html', context)
 
 def registrazione(request):
 
@@ -151,9 +220,16 @@ def login(request):
             utente = Utente.objects.get(email=email)  # Recupera l'istanza dell'utente
 
             # Verifica la password hashata
-            if check_password(password, utente.password):
-                print("Accesso Riuscito")
-                return render(request, 'login.html')  # Puoi modificare questa pagina in base alle necessità
+            if check_password(password, utente.password) and utente.ruolo == 'cittadino':
+                request.session['utente_email'] = utente.email
+
+                # Reindirizza alla home del cittadino
+                return redirect('home_cittadino')
+
+            elif check_password(password, utente.password) and utente.ruolo == 'urbanista':
+                request.session['utente_email'] = utente.email
+                return redirect('home_urbanista')
+
             else:
                 # Password errata
                 return render(request, 'login.html', {"error_message": "Password errata"})

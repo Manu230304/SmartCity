@@ -25,5 +25,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', login, name="login"),
 
+    path('home_cittadino', home_cittadino, name="home_cittadino"),
+
+    path('home_urbanista', home_urbanista, name="home_urbanista"),
+
+    path('aggiungi_progetto', aggiungi_progetto, name="aggiungi_progetto"),
+    path('logout/', logout_view, name='logout'),
+
     path('', homepage, name="homepage")
 ]

@@ -125,13 +125,26 @@ class TecnicoComunale(models.Model):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class Progetto(models.Model):
+
+    STATO = [
+
+    ('in_valutazione', 'In valutazione'),
+    ('in_votazione', 'In votazione'),
+    ('approvato', 'Approvato'),
+    ('in_corso', 'In corso'),
+    ('sospeso', 'Sospeso'),
+    ('concluso', 'Concluso'),
+    ('annullato', 'Annullato'),
+]
+
+
     ID_Progetto = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=255)
     descrizione = models.TextField()
     budget = models.FloatField()
-    stato = models.CharField(max_length=20)
-    approvato = models.BooleanField()
-    data_pubblicazione = models.DateField()
+    stato = models.CharField(max_length=20, choices=STATO, default='in_valutazione')
+    approvato = models.BooleanField(default=False)
+    data_pubblicazione = models.DateField(auto_now_add=True)
     data_inizio = models.DateField(null=True)
     data_fine = models.DateField(null=True)
     urbanista = models.ForeignKey(Urbanista, on_delete=models.CASCADE, related_name='progetti') # quindi potrei usare urbanista.progetti
