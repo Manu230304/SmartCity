@@ -86,7 +86,8 @@ def salva_bio(request):
         urbanista.bio = bio
         urbanista.save()
 
-        return render(request, 'home_urbanista.html', context)
+    return redirect("home_urbanista")
+
 def logout_view(request):
     request.session.flush()  # Cancella tutta la sessione
     return redirect('login')  # Torna alla pagina di login

@@ -32,7 +32,7 @@ urlpatterns = [
     path('aggiungi_progetto', aggiungi_progetto, name="aggiungi_progetto"),
     path('profilo_urbanista', profilo_urbanista, name="profilo_urbanista"),
     path('logout/', logout_view, name='logout'),
-    path('salva_bio', salva_bio, name="profilo_urbanista"),
+    path('salva_bio', salva_bio, name="salva_bio"),
 
     path('', homepage, name="homepage")
 ]
