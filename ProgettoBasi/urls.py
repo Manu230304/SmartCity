@@ -30,7 +30,9 @@ urlpatterns = [
     path('home_urbanista', home_urbanista, name="home_urbanista"),
 
     path('aggiungi_progetto', aggiungi_progetto, name="aggiungi_progetto"),
+    path('profilo_urbanista', profilo_urbanista, name="profilo_urbanista"),
     path('logout/', logout_view, name='logout'),
+    path('salva_bio', salva_bio, name="profilo_urbanista"),
 
     path('', homepage, name="homepage")
 ]

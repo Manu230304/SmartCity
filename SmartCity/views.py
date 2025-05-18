@@ -70,7 +70,23 @@ def aggiungi_progetto(request):
 
 
 
+def salva_bio(request):
+    if request.method == 'POST':
+        email = request.session.get('utente_email')
+        utente = Utente.objects.get(email=email)
+        urbanista = Urbanista.objects.get(utente=utente)
+        bio = request.POST.get('bio')
+        context = {
 
+            'success': "Bio aggiornata!"
+        }
+        if not email:
+            return redirect('login')
+
+        urbanista.bio = bio
+        urbanista.save()
+
+        return render(request, 'home_urbanista.html', context)
 def logout_view(request):
     request.session.flush()  # Cancella tutta la sessione
     return redirect('login')  # Torna alla pagina di login
@@ -89,6 +105,21 @@ def home_cittadino(request):
     }
     return render(request, 'home_cittadino.html', context)
 
+
+def profilo_urbanista(request):
+    email = request.session.get('utente_email')
+    if not email:
+        return redirect('login')
+
+    utente = Utente.objects.get(email=email)
+    urbanista = Urbanista.objects.get(utente=utente)
+    lista_progetti = Progetto.objects.filter(urbanista=urbanista)
+    context = {
+        'lista_progetti': lista_progetti,
+        'utente': utente,
+        'urbanista': urbanista
+    }
+    return render(request, 'profilo_urbanista.html', context)
 def home_urbanista(request):
     email = request.session.get('utente_email')
     if not email:

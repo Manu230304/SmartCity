@@ -66,9 +66,17 @@
 
 <div class="container">
     <!-- Logout -->
-    <div class="logout-btn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Pulsante Profilo a sinistra -->
+    <div>
+        <a href="{% url 'profilo_urbanista' %}" class="btn btn-custom">👤 Profilo</a>
+    </div>
+
+    <!-- Pulsante Logout a destra -->
+    <div>
         <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
     </div>
+</div>
 
     <!-- Benvenuto -->
     <div class="welcome mb-4">
