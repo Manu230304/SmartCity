@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Fasi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #0e1d30;
+        }
+
+        .container-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #38BDF8;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        form {
+            background: #1E293B;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 40px;
+        }
+
+        label {
+            color: #F8FAFC;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            font-size: 16px;
+            padding: 10px;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            border: 1px solid #475569;
+        }
+
+        /* Specific styles for select elements within form-control to ensure text is fully visible */
+        select.form-control {
+            height: auto; /* Allow height to adjust based on content */
+            min-height: 44px; /* A minimum height to ensure readability */
+            line-height: 1.5; /* Ensure sufficient line height for text */
+            padding-right: 30px; /* Add padding for the dropdown arrow */
+            -webkit-appearance: none; /* Remove default arrow on WebKit browsers */
+            -moz-appearance: none; /* Remove default arrow on Mozilla browsers */
+            appearance: none; /* Remove default arrow */
+            /* Add a custom arrow if desired, using background-image for example */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+
+
+        .btn-primary {
+            background-color: #38BDF8;
+            border-color: #38BDF8;
+            color: #0F172A;
+            width: 100%;
+            font-size: 16px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0EA5E9;
+            border-color: #0EA5E9;
+            color: #FFFFFF;
+        }
+
+        .fasi-lista {
+            width: 100%;
+            max-width: 600px;
+            background-color: #1E293B;
+            padding: 20px;
+            border-radius: 12px;
+            color: #F8FAFC;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .fasi-lista h2 {
+            color: #38BDF8;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .fasi-lista ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .fasi-lista li {
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+            display: flex; /* Use flexbox for layout */
+            align-items: flex-start; /* Align items at the start vertically */
+            flex-wrap: wrap; /* Allow content to wrap */
+        }
+
+        .fasi-lista li > div {
+            flex-grow: 1; /* Allow content div to take available space */
+        }
+
+        .fasi-lista li:last-child {
+            border-bottom: none; /* Remove border from the last item */
+        }
+
+        p.success {
+            color: #22c55e;
+            font-weight: 500;
+        }
+
+        p.error {
+            color: #f87171;
+            font-weight: 500;
+        }
+
+        /* Style for the "Segna Completata" button */
+        .btn-complete-fase {
+            background-color: #28a745; /* Green color */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            margin-left: 15px; /* Space from the text */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .btn-complete-fase:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        .fase-info {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <p class="h1">Gestione Fasi - {{ progetto_gestito.nome }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="Titolo_FaseProgetto">Titolo Fase</label>
+                <select class="form-control" id="Titolo_FaseProgetto" name="Titolo_FaseProgetto" required>
+                    <option value="">Seleziona una fase</option>
+                    {# Assuming 'fasi_choices' is passed from the view, e.g., FaseProgetto.FASI #}
+                    {% for value, label in fasi_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="descrizione_fase">Descrizione</label>
+                <textarea class="form-control" id="descrizione_fase" name="descrizione_fase" rows="3" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="data_inizioFase_stimata">Data Inizio Stimata</label>
+                <input type="date" class="form-control" id="data_inizioFase_stimata" name="data_inizioFase_stimata" required>
+            </div>
+
+            <div class="form-group">
+                <label for="data_fineFase_stimata">Data Fine Stimata</label>
+                <input type="date" class="form-control" id="data_fineFase_stimata" name="data_fineFase_stimata" required>
+            </div>
+
+            <div class="form-group">
+                <label for="data_Inizio">Data Inizio Effettiva (Opzionale)</label>
+                <input type="date" class="form-control" id="data_Inizio" name="data_Inizio">
+            </div>
+
+            <div class="form-group">
+                <label for="data_Fine">Data Fine Effettiva (Opzionale)</label>
+                <input type="date" class="form-control" id="data_Fine" name="data_Fine">
+            </div>
+
+            <div class="form-group">
+                <label for="note_tecniche">Note Tecniche (Opzionale)</label>
+                <textarea class="form-control" id="note_tecniche" name="note_tecniche" rows="3"></textarea>
+            </div>
+
+
+            <button type="submit" class="btn btn-primary">Aggiungi Fase</button>
+
+            {% if success %}
+                <p class="success mt-3">{{ success }}</p>
+            {% endif %}
+            {% if error %}
+                <p class="error mt-3">{{ error }}</p>
+            {% endif %}
+        </form>
+
+        <div class="fasi-lista">
+            <h2>Fasi esistenti</h2>
+            {% if fasi %}
+                <ul>
+                    {% for fase in fasi %}
+                        <li>
+                            <div class="fase-info">
+                                <strong>{{ fase.Titolo_FaseProgetto }}</strong>: {{ fase.descrizione_fase }}<br>
+                                <small>
+                                    Inizio Stimato: {{ fase.data_inizioFase_stimata}} | Fine Stimata: {{ fase.data_fineFase_stimata}}<br>
+                                    Inizio Effettivo: {{ fase.data_Inizio }} | Fine Effettiva: {{ fase.data_Fine }}<br>
+                                    Stato: {% if fase.completata %}Completata ✅{% else %}In corso ❌{% endif %}<br>
+                                    Note: {{ fase.note_tecniche|default:"Nessuna nota" }}
+                                </small>
+                            </div>
+                            {% if not fase.completata %}
+                            <form method="POST" action="{% url 'segna_fase_completata' fase.ID_FaseProgetto %}" style="margin-left: auto; display: inline-flex; align-items: center; /* Added for the fix */">
+                                {% csrf_token %}
+                                <button type="submit" name="azione" class="btn btn-complete-fase">Segna come Completata</button>
+                            </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Non ci sono fasi per questo progetto.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

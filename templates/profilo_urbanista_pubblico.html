@@ -67,7 +67,7 @@
             text-align: center;
         }
 
-        /* Styles for the back link */
+        /* Styles for the back link (reused from aggiungi-progetto) */
         .back-link {
             position: absolute;
             top: 20px;
@@ -86,28 +86,29 @@
 </head>
 <body>
 
-<form method="POST" action = "salva_bio">
-
-    {% csrf_token %}
 <div class="profile-card">
     {# Added back link #}
-    <a href="{% url 'home_urbanista' %}" class="back-link">← Torna alla Home</a>
+    {% if ruolo == 'urbanista' %}
+        <a href="{% url 'home_urbanista' %}" class="back-link">← Torna alla Home</a>
+    {% elif ruolo == 'tecnico_comunale' %}
+        <a href="{% url 'home_tecnico' %}" class="back-link">← Torna alla Home</a>
+    {% endif %}
 
     <h2>Profilo Urbanista</h2>
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Nome:</div>
-        <div class="col-sm-8 value">{{ cittadino.nome }} {{ cittadino.cognome }}</div>
+        <div class="col-sm-8 value">{{ urbanista.cittadino.nome }} {{ urbanista.cittadino.cognome }}</div> <!-- Prendi l’urbanista, poi prendi il cittadino associato, e mostra il nome di quel cittadino -->
     </div>
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Email:</div>
-        <div class="col-sm-8 value">{{ cittadino.email }}</div>
+        <div class="col-sm-8 value">{{ urbanista.cittadino.email }}</div>
     </div>
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Municipalità:</div>
-        <div class="col-sm-8 value">{{ cittadino.codice_postale.nome }}</div>
+        <div class="col-sm-8 value">{{ urbanista.cittadino.codice_postale.nome }}</div>
     </div>
 
     <div class="row mb-3">
@@ -122,42 +123,18 @@
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Valutazione media:</div>
-        <div class="col-sm-8 value">{{ urbanista.valutazione_media }}/10</div>
+        <div class="col-sm-8 value">{{ urbanista.valutazione_media }}</div>
     </div>
 
-    <div class="row mb-4">
+     <div class="row mb-3">
         <div class="col-sm-4 label">Bio:</div>
-        <div class="col-sm-8">
-            {% if urbanista.bio %}
-                <div class="bio value">{{ urbanista.bio }}</div>
-            {% else %}
-                <input type="text" id="bio"  name= "bio" placeholder="Scrivi la tua bio..." class="form-control">
-                <button type="submit" id="salvaBtn" style="display: none;" class="btn btn-primary mt-2">Salva</button>
-            {% endif %}
-        </div>
+        <div class="col-sm-8 value">{{ urbanista.bio }}</div>
     </div>
 
-</div>
+</div> {# Close the profile-card div #}
 
 
-{% if success %}
-                <p class="success">{{ success }}</p>
-            {% endif %}
-
-</form>
 </body>
 
-<script>
-  const input = document.getElementById('bio');
-  const bottone = document.getElementById('salvaBtn');
-
-  input.addEventListener('input', function () {
-    if (input.value.trim() !== '') {
-      bottone.style.display = 'inline-block'; // mostra il bottone
-    } else {
-      bottone.style.display = 'none'; // nascondi se vuoto
-    }
-  });
-</script>
 
 </html>

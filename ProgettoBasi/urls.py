@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from django.conf import settings
+from django.conf.urls.static import static
 from SmartCity.views import *
 
 urlpatterns = [
@@ -25,7 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', login, name="login"),
 
-    path('home_cittadino', home_cittadino, name="home_cittadino"),
+    path('homepage_cittadino', homepage_cittadino, name="homepage_cittadino"),
 
     path('home_urbanista', home_urbanista, name="home_urbanista"),
 
@@ -34,5 +35,26 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('salva_bio', salva_bio, name="salva_bio"),
 
+    path('progetti_votabili', progetti_votabili, name="progetti_votabili"),
+
+    path('home_tecnico', home_tecnico, name="home_tecnico"),
+
+    path('profilo_tecnico', profilo_tecnico, name="profilo_tecnico"),
+    path('valuta_progetto', valuta_progetto, name="valuta_progetto"),
+
+    path('vota_progetto', vota_progetto, name="vota_progetto"),
+    path('progetti_approvati', progetti_approvati, name='progetti_approvati'),
+
+    # URL per vedere il profilo pubblico di un urbanista usando la sua email
+    path('profilo_urbanista_pubblico/<str:email>', profilo_urbanista_pubblico, name="profilo_urbanista_pubblico"),
+    path('gestione_fasi/<int:progetto_id>', gestione_fasi, name="gestione_fasi"),
+    path('gestione_fasi', gestione_fasi, name="gestione_fasi"),
+
+    path('segna_fase_completata/<int:fase_id>' , segna_fase_completata, name="segna_fase_completata"),
+
     path('', homepage, name="homepage")
+
+
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
