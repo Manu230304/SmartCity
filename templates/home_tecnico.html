@@ -73,39 +73,49 @@
             border-radius: 8px;
             margin-top: 15px;
         }
-        /* New styles for action buttons */
         .card-actions {
             display: flex;
-            justify-content: space-around; /* Distributes space evenly */
+            justify-content: space-around;
             margin-top: 20px;
         }
         .btn-approve {
-            background-color: #28a745; /* Green for approve */
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 600;
-            flex: 1; /* Allow buttons to grow */
-            margin-right: 10px; /* Space between buttons */
+            flex: 1;
+            margin-right: 10px;
         }
         .btn-approve:hover {
             background-color: #218838;
             color: white;
         }
         .btn-reject {
-            background-color: #dc3545; /* Red for reject */
+            background-color: #dc3545;
             color: white;
             border: none;
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 600;
-            flex: 1; /* Allow buttons to grow */
-            margin-left: 10px; /* Space between buttons */
+            flex: 1;
+            margin-left: 10px;
         }
         .btn-reject:hover {
             background-color: #c82333;
             color: white;
+        }
+        .stat-box {
+            background-color: #1e2e4a;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .stat-box h4 {
+            color: #38BDF8;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -120,15 +130,26 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
-
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'profilo_tecnico' %}">👤 Profilo</a>
+                    <a class="nav-link" href="{% url 'profilo_tecnico' %}">Profilo</a>
                 </li>
 
-        <li class="nav-item">
-    <a class="nav-link" href="{% url 'progetti_approvati' %}">Progetti Approvati</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'progetti_votabili_tecnico' %}">🗳️ Progetti Approvati</a>
+                </li>
 
-        </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'progetti_votabili' %}">Progetti Votabili</a>
+                </li>
+
+
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'gestione_progetti' %}">Gestione Progetti</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'progetti_completati' %}">Progetti Completati</a>
+                </li>
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
@@ -140,19 +161,43 @@
 
     <!-- Benvenuto -->
     <div class="welcome mb-4">
-        Ciao, {{ cittadino.nome }} 🛠️
+        Ciao, {{ cittadino.nome }}
         <p>Municipalità: {{ cittadino.codice_postale.nome }}</p>
     </div>
 
-    <!-- Progetti del tuo comune da valutare -->
-    <div class="section-title">📥 Progetti in attesa di approvazione</div>
+    <!-- Statistiche -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stat-box">
+                <h4>Votazioni</h4>
+                <p>{{ voti_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <h4>Recensioni</h4>
+                <p>{{ recensioni_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <h4>Punteggio</h4>
+                <p>{{ cittadino.punteggio_attivita }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progetti in attesa di approvazione -->
+    <div class="section-title">Progetti in attesa di approvazione</div>
     {% for progetto in progetti %}
         <div class="card p-3">
             <h5 class="card-title">{{ progetto.nome }}</h5>
             <p class="card-text">{{ progetto.descrizione }}</p>
-            <h7 class="card-title">Proposto da: <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.cittadino.email%}">{{ progetto.urbanista.cittadino.nome }} {{ progetto.urbanista.cittadino.cognome }}</a>
+            <h7 class="card-title">Proposto da:
+                <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.cittadino.email %}">
+                    {{ progetto.urbanista.cittadino.nome }} {{ progetto.urbanista.cittadino.cognome }}
+                </a>
             </h7>
-
             <p class="card-text"><small>Budget: €{{ progetto.budget }}</small></p>
             <p class="card-text">Possibile data inizio: {{ progetto.data_inizio }}</p>
             <p class="card-text">Possibile data fine: {{ progetto.data_fine }}</p>
@@ -160,14 +205,13 @@
                 <img class="card-img-top" src="{{ progetto.immagine.url }}" alt="Foto progetto {{ progetto.nome }}">
             {% endif %}
 
-            {# Added Approve/Reject buttons #}
             <div class="card-actions">
                 <form method="POST" action="/valuta_progetto">
                     {% csrf_token %}
                     <input type="hidden" name="progetto_id" value="{{ progetto.ID_Progetto }}">
                     <button type="submit" name="azione" value="approva" class="btn btn-approve">Approva</button>
                 </form>
-                <form method="POST" action="valuta_progetto">
+                <form method="POST" action="/valuta_progetto">
                     {% csrf_token %}
                     <input type="hidden" name="progetto_id" value="{{ progetto.ID_Progetto }}">
                     <button type="submit" name="azione" value="rifiuta" class="btn btn-reject">Rifiuta</button>

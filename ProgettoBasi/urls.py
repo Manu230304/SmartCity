@@ -43,14 +43,29 @@ urlpatterns = [
     path('valuta_progetto', valuta_progetto, name="valuta_progetto"),
 
     path('vota_progetto', vota_progetto, name="vota_progetto"),
-    path('progetti_approvati', progetti_approvati, name='progetti_approvati'),
+    path('gestione_progetti', gestione_progetti, name='gestione_progetti'),
 
     # URL per vedere il profilo pubblico di un urbanista usando la sua email
     path('profilo_urbanista_pubblico/<str:email>', profilo_urbanista_pubblico, name="profilo_urbanista_pubblico"),
     path('gestione_fasi/<int:progetto_id>', gestione_fasi, name="gestione_fasi"),
     path('gestione_fasi', gestione_fasi, name="gestione_fasi"),
 
+    path('segna_progetto_completato/<int:progetto_id>', segna_progetto_completato, name="segna_progetto_completato"),
+
+    path('progetti_completati', progetti_completati, name='progetti_completati'),
+
+    path('progetti_votabili_tecnico', progetti_votabili_tecnico, name='progetti_votabili_tecnico'),
+
+    path('toggle_votazione/<int:progetto_id>', toggle_votazione, name="toggle_votazione"),
+
+    path('prendi_piu_votato', prendi_piu_votato, name="prendi_piu_votato"),
+    path('recensioni', recensioni, name="recensioni"),
+
+    path('recensisci_progetto', recensisci_progetto, name="recensisci_progetto"),
+
     path('segna_fase_completata/<int:fase_id>' , segna_fase_completata, name="segna_fase_completata"),
+
+
 
     path('', homepage, name="homepage")
 

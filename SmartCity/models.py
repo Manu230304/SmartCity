@@ -36,7 +36,7 @@ class Cittadino(models.Model):
     nome = models.CharField(max_length=70)
     cognome = models.CharField(max_length=70)
     email = models.EmailField(max_length=150, primary_key=True)
-    password = models.CharField(max_length=50)
+    password = models.CharField(max_length=128)
     codice_postale = models.ForeignKey(Municipalita, on_delete=models.CASCADE)
     occupazione = models.CharField(max_length=70, choices=OCCUPAZIONI, default=OCCUPAZIONI[0])
     data_nascita = models.DateField()
@@ -110,6 +110,8 @@ class Progetto(models.Model):
     ('in_valutazione', 'In valutazione'),
     ('in_votazione', 'In votazione'),
     ('concluso', 'Concluso'),
+    ('in_corso', 'In Corso'),
+    ('approvato', 'Approvato'),
     ('rifiutato', 'Rifiutato'),
 ]
 
@@ -126,6 +128,9 @@ class Progetto(models.Model):
     codice_postale = models.ForeignKey(Municipalita, on_delete=models.CASCADE, related_name='progetti')
     immagine = models.ImageField(upload_to='progetti/' , null=True, blank=True)
     totale_voti = models.PositiveIntegerField(default=0)
+    completato = models.BooleanField(default=False)
+    data_fine_effettiva = models.DateField(default=None, null=True)
+    tecnico_approvatore = models.ForeignKey(TecnicoComunale, on_delete=models.CASCADE, related_name='progetti', default=None, null=True) # Inizialmente non abbiamo un tecnico approvato, quando viene aggiunto il progetto
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -176,8 +181,38 @@ class Votazione(models.Model):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class Recensione(models.Model):
+
+    STATO_RECENSIONE = [
+        ("recensito", "Recensito"),
+        ("non_recensito", "Non Recensito"),
+
+    ]
+
+
     ID_Recensione = models.AutoField(primary_key=True)
     progetto = models.ForeignKey(Progetto, on_delete=models.CASCADE, related_name='recensioni')
     cittadino = models.ForeignKey(Cittadino, on_delete=models.CASCADE, related_name='recensioni')
     voto = models.IntegerField()
     descrizione = models.TextField(null=True)
+    stato_recensione = models.CharField(choices=STATO_RECENSIONE, max_length=20, default="non_recensito")
+
+
+
+class Badge(models.Model):
+
+    STATO_RECENSIONE = [
+        ("recensito", "Recensito"),
+        ("non_recensito", "Non Recensito"),
+
+    ]
+
+
+    ID_Badge = models.AutoField(primary_key=True)
+    nome = models.CharField(max_length=255)
+    descrizione = models.CharField(max_length=255)
+    soglia_punti = models.IntegerField()
+
+
+class Ottiene(models.Model):
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name='ottiene')
+    cittadino = models.ForeignKey(Cittadino, on_delete=models.CASCADE, related_name='ottiene')

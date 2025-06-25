@@ -1,4 +1,7 @@
 from contextlib import nullcontext
+
+from django.db.models import Avg
+from django.utils import timezone
 from operator import truediv
 
 from django.contrib.auth.decorators import login_required
@@ -102,9 +105,13 @@ def homepage_cittadino(request):
         return redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
+    recensioni = Recensione.objects.filter(cittadino_id=cittadino).count()
+    votazioni = Votazione.objects.filter(cittadino=cittadino).count()
 
     context = {
         'cittadino': cittadino,
+        'recensioni': recensioni,
+        'votazioni': votazioni,
 
     }
 
@@ -133,10 +140,16 @@ def home_urbanista(request):
     cittadino = Cittadino.objects.get(email=email)
     urbanista = Urbanista.objects.get(cittadino=cittadino)
     lista_progetti = Progetto.objects.filter(urbanista=urbanista)
+
+    recensioni = Recensione.objects.filter(cittadino_id=cittadino).count()
+    votazioni = Votazione.objects.filter(cittadino=cittadino).count()
+
     context = {
         'lista_progetti': lista_progetti,
         'cittadino': cittadino,
-        'urbanista': urbanista
+        'urbanista': urbanista,
+        'recensioni': recensioni,
+        'votazioni': votazioni
     }
 
     return render(request, 'home_urbanista.html', context)
@@ -290,7 +303,7 @@ def progetti_votabili(request):
     if cittadino.occupazione == 'urbanista':
         urbanista = Urbanista.objects.get(cittadino=cittadino)
 
-        lista_progetti = Progetto.objects.filter(stato='approvato').exclude(urbanista=urbanista)
+        lista_progetti = Progetto.objects.filter(stato='in_votazione').exclude(urbanista=urbanista)
 
         context = {
         'lista_progetti': lista_progetti,
@@ -306,6 +319,17 @@ def progetti_votabili(request):
         context = {
         'lista_progetti': lista_progetti,
         'cittadino': cittadino,
+        }
+
+        return render(request, 'progetti_votabili.html', context)
+
+    if cittadino.occupazione == 'tecnico_comunale':
+        tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
+        lista_progetti = Progetto.objects.filter(stato='in_votazione', codice_postale_id=cittadino_codice)
+        context = {
+            'lista_progetti': lista_progetti,
+            'cittadino': cittadino,
+            'tecnico': tecnico
         }
 
         return render(request, 'progetti_votabili.html', context)
@@ -336,7 +360,8 @@ def home_tecnico(request):
     tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
     municipalita = tecnico.cittadino.codice_postale
 
-
+    recensioni = Recensione.objects.filter(cittadino_id=cittadino).count()
+    votazioni = Votazione.objects.filter(cittadino=cittadino).count()
 
     # Seleziona solo i progetti che:
     # - sono stati proposti da urbanisti il cui cittadino è nella stessa municipalità del tecnico
@@ -345,7 +370,9 @@ def home_tecnico(request):
 
     context = {
         'progetti': progetti_in_valutazione,
-        'cittadino': tecnico.cittadino
+        'cittadino': tecnico.cittadino,
+        'recensioni': recensioni,
+        'votazioni': votazioni
     }
     return render(request, 'home_tecnico.html', context)
 
@@ -374,12 +401,17 @@ def valuta_progetto(request):
         progetto_id = request.POST.get('progetto_id')
         azione = request.POST.get('azione')
 
+        cittadino = Cittadino.objects.get(email=email)
+        tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
+
 
 
         if(azione == 'approva'):
             progetto = Progetto.objects.get(ID_Progetto=progetto_id)
-            progetto.stato = 'in_votazione'
+            progetto.stato = 'approvato'
+            progetto.tecnico_approvatore = tecnico
             progetto.save()
+
             return redirect( 'home_tecnico')
 
         if (azione == 'rifiuta'):
@@ -417,7 +449,7 @@ def vota_progetto(request):
             return redirect('progetti_votabili')
 
 
-def progetti_approvati(request):
+def gestione_progetti(request):
     email = request.session.get('cittadino_email')
     if not email:
         redirect('login')
@@ -427,14 +459,14 @@ def progetti_approvati(request):
 
     municipalita = tecnico.cittadino.codice_postale
 
-    progetti = Progetto.objects.filter(codice_postale_id=municipalita, stato = "in_votazione")
+    progetti = Progetto.objects.filter(codice_postale_id=municipalita, stato = "in_corso", completato=False, tecnico_approvatore=tecnico)
 
     context = {
             'progetti': progetti,
             'cittadino': cittadino
     }
 
-    return render(request, 'progetti_approvati.html', context)
+    return render(request, 'gestione_progetti.html', context)
 
 
 def gestione_fasi(request, progetto_id):
@@ -444,6 +476,10 @@ def gestione_fasi(request, progetto_id):
         redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
+    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
+    municipalita = tecnico.cittadino.codice_postale
+    tecnici= TecnicoComunale.objects.filter(cittadino__codice_postale_id=municipalita).exclude(cittadino__email = email)
+
     progetto_gestito = Progetto.objects.get(ID_Progetto=progetto_id)
     FasiProgettoGestito = FaseProgetto.objects.filter(progetto=progetto_gestito)
 
@@ -451,7 +487,9 @@ def gestione_fasi(request, progetto_id):
         'progetto_gestito': progetto_gestito,
         'cittadino': cittadino,
         'titoli_fase': FaseProgetto.FASI,
-        'fasi': FasiProgettoGestito
+        'fasi': FasiProgettoGestito,
+        'tecnici': tecnici
+
     }
 
     if request.method == 'POST':
@@ -464,16 +502,17 @@ def gestione_fasi(request, progetto_id):
         data_fineFaseStimata = request.POST.get('data_fineFase_stimata')
         descrizione = request.POST.get('descrizione_fase')
         note_tecniche = request.POST.get('note_tecniche')
-
+        assegna_tecnico = request.POST.get('assegna_tecnico')
 
 
         fase_progetto = FaseProgetto(Titolo_FaseProgetto=titolo_fase, descrizione_fase=descrizione, data_inizioFase_stimata = data_inizioFaseStimata, data_fineFase_stimata = data_fineFaseStimata, data_Inizio = data_inizio, data_Fine = data_fine, note_tecniche = note_tecniche, progetto = progetto_gestito)
         fase_progetto.save()
 
-        redirect('gestione_fasi', progetto_id=progetto_id)
+        tecnico_aggiunto = TecnicoComunale.objects.get(cittadino_id=assegna_tecnico)
+        Gestisce.objects.create(fase=fase_progetto, tecnico=tecnico_aggiunto)
+        return redirect('gestione_fasi', progetto_id=progetto_id)
 
     return render(request, 'gestione_fasi.html', context)
-
 
 
 def segna_fase_completata(request, fase_id):
@@ -491,3 +530,161 @@ def segna_fase_completata(request, fase_id):
 
 
         return redirect('gestione_fasi', progetto_id=fase_progetto.progetto.ID_Progetto)
+
+def segna_progetto_completato(request, progetto_id):
+        email = request.session.get('cittadino_email')
+        if not email:
+            return redirect('login')
+
+        if request.method == 'POST':
+
+            progetto = Progetto.objects.get(ID_Progetto=progetto_id)
+            progetto.completato = True
+            progetto.stato = "concluso"
+            progetto.data_fine_effettiva = timezone.now().date()
+            progetto.save()
+            return redirect('gestione_progetti')
+
+
+def progetti_completati(request):
+    email_sessione = request.session.get('cittadino_email')
+    if not email_sessione:
+        return redirect('login')
+
+    cittadino = Cittadino.objects.get(email=email_sessione)
+    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
+
+    municipalita = tecnico.cittadino.codice_postale
+
+    progetti = Progetto.objects.filter(codice_postale_id=municipalita, completato=True)
+
+    context = {
+        'progetti': progetti,
+        'cittadino': cittadino,
+    }
+
+    return render(request, 'progetti_completati.html', context)
+
+def toggle_votazione(request, progetto_id):
+    email = request.session.get('cittadino_email')
+    if not email:
+        return redirect('login')
+
+    progetto = Progetto.objects.get(ID_Progetto=progetto_id)
+
+    if progetto.stato == "approvato":
+        progetto.stato = "in_votazione"
+        progetto.save()
+
+    elif progetto.stato == "in_votazione":
+        progetto.stato = "approvato"
+        progetto.save()
+
+    return redirect('home_tecnico')
+
+
+
+
+def progetti_votabili_tecnico(request):
+
+        email = request.session.get('cittadino_email')
+
+        if not email:
+            return redirect('login')
+
+        cittadino = Cittadino.objects.get(email=email)
+
+        tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
+        municipalita = tecnico.cittadino.codice_postale
+        lista_progetti = Progetto.objects.filter(stato__in=['approvato', 'in_votazione'], codice_postale_id=municipalita)
+
+        context = {
+                'lista_progetti': lista_progetti,
+                'tecnico': tecnico,
+            }
+
+        return render(request, 'progetti_votabili_tecnico.html', context)
+
+
+def prendi_piu_votato(request):
+    email = request.session.get('cittadino_email')
+    if not email:
+        return redirect('login')
+
+    cittadino = Cittadino.objects.get(email=email)
+
+    progetto = Progetto.objects.filter(stato='approvato').order_by('-totale_voti').first()
+    progetto.stato = "in_corso"
+    progetto.save()
+    progetti_non_scelti = Progetto.objects.filter(stato='approvato').exclude(ID_Progetto=progetto.ID_Progetto)
+
+    progetti_non_scelti.update(stato="in_valutazione")
+
+
+    return redirect('progetti_votabili_tecnico')
+
+
+
+def recensioni(request):
+    email = request.session.get('cittadino_email')
+    if not email:
+        return redirect('login')
+
+    cittadino = Cittadino.objects.get(email=email)
+
+    progetti_conclusi = Progetto.objects.filter(stato='concluso', codice_postale_id=cittadino.codice_postale_id)
+
+    progetti_recensiti = Recensione.objects.filter(cittadino=cittadino, stato_recensione="recensito").values_list('progetto__ID_Progetto', flat=True) # Mi restituisce una lista di valori
+
+
+    lista_progetti = progetti_conclusi.exclude(ID_Progetto__in=progetti_recensiti) # Cerco l'ID progetto in quella lista
+
+    context = {
+
+        'lista_progetti': lista_progetti,
+    }
+
+    return render(request, 'recensioni.html', context)
+
+
+
+def recensisci_progetto(request):
+    if request.method == "POST":
+        email = request.session.get('cittadino_email')
+        if not email:
+            return redirect('login')
+
+        cittadino = get_object_or_404(Cittadino, email=email)
+        progetto_id = request.POST.get('progetto_id')
+        progetto = get_object_or_404(Progetto, ID_Progetto=progetto_id)
+        voto = int(request.POST.get('voto'))
+        descrizione = request.POST.get('descrizione', '')
+
+        if Recensione.objects.filter(progetto=progetto, cittadino=cittadino).exists():
+            return redirect('recensioni')  # già recensito
+
+
+        nuova_recensione = Recensione.objects.create(
+            progetto=progetto,
+            cittadino=cittadino,
+            voto=voto,
+            descrizione=descrizione,
+            stato_recensione="recensito"
+        )
+
+
+        # Aggiorna attività del cittadino
+        cittadino.punteggio_attivita += 10
+        cittadino.save()
+
+        # Aggiorna valutazione media dell'urbanista del progetto
+        urbanista = progetto.urbanista
+        media = Recensione.objects.filter(progetto__urbanista=urbanista).aggregate(avg=Avg('voto'))['avg']
+        if media is not None:
+            urbanista.valutazione_media = round(media, 2)
+            urbanista.save()
+
+        return redirect('recensioni')
+
+
+

@@ -3,7 +3,7 @@
 {% load static %}
 <head>
     <meta charset="UTF-8">
-    <title>Progetti Approvati</title>
+    <title>Gestione Progetti</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <style>
@@ -13,12 +13,40 @@
             color: #F8FAFC;
             padding: 20px;
         }
+
+
+         .btn-complete-progetto {
+            background-color: #17a2b8; /* Un colore blu-verde per distinguerlo */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            margin-right: 10px; /* Per separarlo da altri elementi se presenti */
+            cursor: pointer; /* Indica che è cliccabile */
+        }
+        .btn-complete-progetto:hover {
+            background-color: #138496; /* Colore più scuro all'hover */
+            color: white;
+        }
+
         .navbar-custom {
             background-color: #1E293B;
             border-radius: 12px;
             margin-bottom: 30px;
             padding: 10px 20px;
         }
+
+        .back-link {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            color: #38BDF8;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
         .navbar-custom .navbar-brand,
         .navbar-custom .nav-link {
             color: #F8FAFC;
@@ -116,8 +144,8 @@
     </style>
 </head>
 <body>
-
-    <div class="section-title">📥 Progetti Approvati</div>
+<a href="{% url 'home_tecnico' %}" class="back-link">← Torna indietro</a>
+    <div class="section-title">Gestione Progetti</div>
     {% for progetto in progetti %}
         <div class="card p-3">
             <h5 class="card-title">{{ progetto.nome }}</h5>
@@ -135,7 +163,10 @@
             {% if progetto.immagine %}
                 <img class="card-img-top" src="{{ progetto.immagine.url }}" alt="Foto progetto {{ progetto.nome }}">
             {% endif %}
-
+<form method="POST" action="{% url 'segna_progetto_completato' progetto.ID_Progetto %}" style="margin-left: auto; display: inline-flex; align-items: center;">
+                                {% csrf_token %}
+                                <button type="submit" name="azione" class="btn btn-complete-progetto">Completato</button>
+                            </form>
             <a class="btn btn-custom" href="{% url 'gestione_fasi' progetto_id=progetto.ID_Progetto %}">Gestisci fasi</a>
 
 

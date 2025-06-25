@@ -123,10 +123,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'profilo_urbanista' %}">👤 Profilo</a>
+                    <a class="nav-link" href="{% url 'profilo_urbanista' %}">Profilo</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'progetti_votabili' %}">🗳️ Progetti Votabili</a>
+                    <a class="nav-link" href="{% url 'progetti_votabili' %}">Progetti Votabili</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
@@ -139,7 +139,7 @@
 
     <!-- Benvenuto -->
     <div class="welcome mb-4">
-        Ciao, {{ cittadino.nome }} 👷‍♂️
+        Ciao, {{ cittadino.nome }}]️
         <p>Municipalità: {{ cittadino.codice_postale.nome }}</p>
     </div>
 
@@ -166,7 +166,7 @@
     </div>
 
     <!-- Progetti pubblicati dall'urbanista -->
-    <div class="section-title">🏗️ I tuoi progetti pubblicati</div>
+    <div class="section-title">I tuoi progetti pubblicati</div>
     {% for progetto in lista_progetti %}
         <div class="card p-3">
             <h5 class="card-title">{{ progetto.nome }}</h5>

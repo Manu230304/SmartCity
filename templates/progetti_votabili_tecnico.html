@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="it">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Progetti Votabili - Tecnico </title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #0e1d30;
+            font-family: 'Poppins', sans-serif;
+            color: #F8FAFC;
+            padding: 20px;
+        }
+
+        /* Custom styles for the navbar */
+        .navbar-custom {
+            background-color: #1E293B; /* Darker background for the navbar */
+            border-radius: 12px;
+            margin-bottom: 30px; /* Space below the navbar */
+            padding: 10px 20px; /* Padding inside the navbar */
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: #F8FAFC; /* White text for links */
+            transition: color 0.3s ease;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #38BDF8; /* Light blue on hover */
+        }
+
+        .navbar-custom .btn-danger {
+            background-color: #EF4444; /* Red for logout button */
+            border-color: #EF4444;
+            border-radius: 8px;
+        }
+
+        .navbar-custom .btn-danger:hover {
+            background-color: #DC2626;
+            border-color: #DC2626;
+        }
+
+        .welcome {
+            font-size: 2rem;
+            color: #38BDF8;
+        }
+
+        .section-title {
+            margin-top: 40px;
+            font-size: 1.5rem;
+            color: #38BDF8;
+        }
+
+        .card {
+            background-color: #1E293B;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            /* Added/Modified for button visibility */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-title, .card-text {
+            color: #F8FAFC;
+        }
+
+        /* CSS for responsive images in cards */
+        .card-img-top {
+            max-width: 100%; /* Ensures image doesn't exceed card width */
+            height: auto;    /* Maintains aspect ratio */
+            max-height: 400px; /* Adjusted maximum height for the images to prevent excessive pushing down */
+            object-fit: contain; /* Changed from 'cover' to 'contain' to show the full image */
+            border-radius: 8px; /* Slightly rounded corners for images */
+            margin-top: 15px; /* Adds some space above the image */
+            flex-shrink: 0; /* Prevents image from shrinking if other content needs space */
+        }
+
+        .btn-custom {
+            background-color: #38BDF8;
+            color: #0F172A;
+            border: none;
+            border-radius: 8px; /* Added border-radius for custom buttons */
+        }
+
+        .btn-custom:hover {
+            background-color: #0EA5E9;
+            color: white;
+        }
+
+        .bio-box {
+            background-color: #1e2e4a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Styles for the vote button and count (Copied/Modified for button visibility) */
+        .vote-section {
+            display: flex;
+            align-items: center;
+            margin-top: auto; /* Pushes the section to the bottom of the card */
+            padding-top: 15px; /* Space above the section */
+            border-top: 1px solid #475569; /* Optional: Separator line */
+            gap: 15px;
+        }
+
+        .vote-count {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #38BDF8;
+        }
+
+        .btn-vote {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-vote:hover {
+            background-color: #218838;
+        }
+
+
+    </style>
+</head>
+
+<body>
+<div class="section-title">Progetti</div>
+
+<div class="text-right mb-4">
+    <form method="POST" action="{% url 'prendi_piu_votato' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-custom">
+            Prendi quello con più voti
+        </button>
+    </form>
+</div>
+
+
+    {% for progetto in lista_progetti %}
+    <div class="card p-3">
+        <h5 class="card-title">{{ progetto.nome }} - Ideato da:
+            <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.cittadino.email %}">
+                {{ progetto.urbanista.cittadino.nome }} {{ progetto.urbanista.cittadino.cognome }}
+            </a>
+        </h5>
+        <p style="font-size: large" class="card-text">{{ progetto.descrizione }}</p>
+        <p style="font-size: large" class="card-text"><small>Budget: €{{ progetto.budget }}</small></p>
+        <p style="font-size: large" class="card-text">Possibile data inizio: {{ progetto.data_inizio }}</p>
+        <p style="font-size: large" class="card-text">Possibile data fine: {{ progetto.data_fine }}</p>
+        <p style="font-size: large" class="card-text">Stato: {{ progetto.stato }}</p>
+
+        {% if progetto.immagine %}
+            <img class="card-img-top" src="{{ progetto.immagine.url }}" alt="Foto del progetto {{ progetto.nome }}">
+        {% endif %}
+
+        <div class="vote-section">
+
+
+        <!-- Apri/Chiudi votazioni -->
+        <form method="POST" action="{% url 'toggle_votazione' progetto.ID_Progetto %}" style="display:inline; margin-left: 10px;">
+            {% csrf_token %}
+            {% if progetto.stato == 'approvato' %}
+                <button type="submit" class="btn btn-warning">Apri votazioni</button>
+            {% elif progetto.stato == 'in_votazione' %}
+                <button type="submit" class="btn btn-secondary">Chiudi votazioni</button>
+            {% endif %}
+        </form>
+                {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+            </form>
+            <span class="vote-count">Voti: {{ progetto.totale_voti|default:"0" }}</span>
+        </div>
+    </div>
+{% empty %}
+    <p>Nessun progetto in votazione al momento.</p>
+{% endfor %}
+
+</div>
+
+<!-- Bootstrap JS and Popper.js (required for navbar toggler) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>

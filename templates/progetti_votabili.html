@@ -72,13 +72,13 @@
 
         /* CSS for responsive images in cards */
         .card-img-top {
-            max-width: 100%; /* Ensures image doesn't exceed card width */
-            height: auto;    /* Maintains aspect ratio */
-            max-height: 400px; /* Adjusted maximum height for the images to prevent excessive pushing down */
-            object-fit: contain; /* Changed from 'cover' to 'contain' to show the full image */
-            border-radius: 8px; /* Slightly rounded corners for images */
-            margin-top: 15px; /* Adds some space above the image */
-            flex-shrink: 0; /* Prevents image from shrinking if other content needs space */
+            max-width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 15px;
+            flex-shrink: 0;
         }
 
         .btn-custom {
@@ -135,7 +135,12 @@
 </head>
 
 <body>
-<div class="section-title">🏗️ Progetti</div>
+
+
+
+
+
+<div class="section-title">Progetti</div>
     {% for progetto in lista_progetti %}
     <div class="card p-3">
         <h5 class="card-title">{{ progetto.nome }} - Ideato da:
@@ -154,10 +159,12 @@
         {% endif %}
 
         <div class="vote-section">
-            <form method="POST" action="/vota_progetto">
-                {% csrf_token %}
-                <input type="hidden" name="progetto_id" value="{{ progetto.ID_Progetto }}">
-                <button type="submit" name="scelta_voto" value="si" class="btn btn-vote">Vota</button>
+             <form method="POST" action="/vota_progetto" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="progetto_id" value="{{ progetto.ID_Progetto }}">
+            <button type="submit" name="scelta_voto" value="si" class="btn btn-vote">Vota</button>
+        </form>
+
 
                 {% if messages %}
   <ul class="messages">
