@@ -1,0 +1,6 @@
+Per le prove sono stati aggiunti vari tecnici, cittadini e urbanisti. La password di ognuno di essi è: Passwordpassword04*
+Ci sono due progetti votabili per la municipalità con CAP 80145.
+E' possibile aggiungere un progetto dalla homepage di un qualsiasi urbanista.
+Il tecnico tramite homepage può aprire, chiudere le votazioni e prendere il progetto con più voti. Il progetto più votato potrà essere gestito dal tecnico che l'ha approvato, e può gestire anche le varie fasi.
+
+Vincoli: L'urbanista non può votare per i propri progetti. Un qualsiasi cittadino può votare solo i progetti della proprio municipalità di appartenenza.
