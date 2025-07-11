@@ -4,19 +4,7 @@ Questo progetto mira a realizzare un sistema informativo completo per **moderniz
 
 Il sistema presenta un elenco dettagliato dei progetti urbanistici, suddivisi per stato (attivi, conclusi, aperti alle votazioni), e include informazioni essenziali quali nome, descrizione, municipalità, date previste, stato e budget. Ogni progetto è associato a una specifica municipalità per riflettere la suddivisione amministrativa del territorio e limitare l'interazione dei cittadini ai progetti della propria zona.
 
-&nbsp;**Indice**
-
-- [Modello Entità/Relazione](#modello-entitàrelazione)
-- [Funzionalità Principali](#funzionalità-principali)
-- [Tecnologie Utilizzate](#tecnologie-utilizzate)
-- [Installazione](#installazione)
-- [Configurazione del Database](#configurazione-del-database)
-- [Utilizzo](#utilizzo)
-- [Sicurezza](#sicurezza)
-- [Implementazioni Future](#implementazioni-future)
-- [Licenza](#licenza)
-
-##;**Modello Entità/Relazione**
+&nbsp;**Modello Entità/Relazione**
 
 Il cuore del sistema è un **database SQL** progettato per centralizzare le informazioni. Inizialmente concepito con un'entità padre Cittadino e due entità figlie (Urbanista, Tecnico Comunale), il modello è stato ottimizzato per incorporare tutti i campi specifici direttamente nella tabella padre Cittadino. Questa scelta semplifica la gestione, migliora l'efficienza delle query (evitando join automatici di Django) e mantiene il controllo logico attraverso un campo ruolo che funge da discriminatore. Gli attributi non pertinenti al ruolo del cittadino vengono lasciati nulli.
 
