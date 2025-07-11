@@ -16,7 +16,7 @@ Il sistema presenta un elenco dettagliato dei progetti urbanistici, suddivisi pe
 - [Implementazioni Future](#implementazioni-future)
 - [Licenza](#licenza)
 
-&nbsp;**Modello Entità/Relazione**
+##;**Modello Entità/Relazione**
 
 Il cuore del sistema è un **database SQL** progettato per centralizzare le informazioni. Inizialmente concepito con un'entità padre Cittadino e due entità figlie (Urbanista, Tecnico Comunale), il modello è stato ottimizzato per incorporare tutti i campi specifici direttamente nella tabella padre Cittadino. Questa scelta semplifica la gestione, migliora l'efficienza delle query (evitando join automatici di Django) e mantiene il controllo logico attraverso un campo ruolo che funge da discriminatore. Gli attributi non pertinenti al ruolo del cittadino vengono lasciati nulli.
 
