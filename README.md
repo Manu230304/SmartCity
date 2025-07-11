@@ -7,14 +7,14 @@ Il sistema presenta un elenco dettagliato dei progetti urbanistici, suddivisi pe
 &nbsp;**Indice**
 
 - [Modello Entità/Relazione](#modello-entitàrelazione)
-- [Funzionalità Principali](https://www.google.com/search?q=%23funzionalit%C3%A0-principali)
-- [Tecnologie Utilizzate](https://www.google.com/search?q=%23tecnologie-utilizzate)
-- [Installazione](https://www.google.com/search?q=%23installazione)
-- [Configurazione del Database](https://www.google.com/search?q=%23configurazione-del-database)
-- [Utilizzo](https://www.google.com/search?q=%23utilizzo)
-- [Sicurezza](https://www.google.com/search?q=%23sicurezza)
-- [Implementazioni Future](https://www.google.com/search?q=%23implementazioni-future)
-- [Licenza](https://www.google.com/search?q=%23licenza)
+- [Funzionalità Principali](#funzionalità-principali)
+- [Tecnologie Utilizzate](#tecnologie-utilizzate)
+- [Installazione](#installazione)
+- [Configurazione del Database](#configurazione-del-database)
+- [Utilizzo](#utilizzo)
+- [Sicurezza](#sicurezza)
+- [Implementazioni Future](#implementazioni-future)
+- [Licenza](#licenza)
 
 &nbsp;**Modello Entità/Relazione**
 
