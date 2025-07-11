@@ -199,8 +199,8 @@
   <select name="assegna_tecnico" class="form-control" required>
     <option value="" selected>Seleziona tecnico</option>
     {% for tecnico in tecnici %}
-      <option value="{{ tecnico.cittadino_id }}">
-        {{ tecnico.cittadino.nome }} {{ tecnico.cittadino.cognome }} - {{ tecnico.specializzazione }}
+      <option value="{{ tecnico.email }}">
+        {{ tecnico.nome }} {{ tecnico.cognome }} - {{ tecnico.specializzazione }}
       </option>
     {% endfor %}
   </select>

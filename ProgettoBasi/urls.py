@@ -62,6 +62,11 @@ urlpatterns = [
     path('recensioni', recensioni, name="recensioni"),
 
     path('recensisci_progetto', recensisci_progetto, name="recensisci_progetto"),
+path('recensioni_pagina_urbanista', recensioni_pagina_urbanista, name="recensioni_pagina_urbanista"),
+
+    # path('login_vulnerabile', login_vulnerabile, name="login_vulnerabile"),
+
+    path('recensioni_pagina_tecnico', recensioni_pagina_tecnico, name="recensioni_pagina_tecnico"),
 
     path('segna_fase_completata/<int:fase_id>' , segna_fase_completata, name="segna_fase_completata"),
 

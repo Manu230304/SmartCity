@@ -337,25 +337,23 @@
                 document.getElementById('telefono').required = false;
                 document.getElementById('selectOccupazione').required = false;
 
-                if (selectedRole === 'urbanista') {
+                if (selectedRole === 'Urbanista') {
                     campiUrbanista.style.display = 'block';
                     document.getElementById('selectLivello').required = true;
                     document.getElementById('selectQualifica').required = true;
-                } else if (selectedRole === 'tecnico_comunale') {
+                } else if (selectedRole === 'Tecnico_Comunale') {
                     campiTecnico.style.display = 'block';
                     document.getElementById('specializzazione').required = true;
                     document.getElementById('matricola').required = true;
                     document.getElementById('emailUfficio').required = true;
                 }
 
-                else if (selectedRole === 'altro'){
+                else {
                     campiAltro.style.display = 'block';
                     document.getElementById('selectOccupazione').required = true;
                 }
 
-                else {
-                    noRoleSelectedMessage.style.display = 'block';
-                }
+
             }
 
             ruoloSelect.addEventListener('change', toggleRoleFields);

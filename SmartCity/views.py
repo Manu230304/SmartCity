@@ -1,6 +1,9 @@
 from contextlib import nullcontext
+from functools import wraps
 
 from django.db.models import Avg
+
+from django.http import HttpResponseForbidden, HttpResponse
 from django.utils import timezone
 from operator import truediv
 
@@ -12,7 +15,18 @@ from django.contrib import messages
 import ProgettoBasi
 from SmartCity.models import *
 
-
+def role_required(allowed_roles):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if not request.session.get('is_authenticated'):
+                return redirect('login')
+            ruolo = request.session.get('ruolo')
+            if ruolo not in allowed_roles:
+                return HttpResponseForbidden("Accesso non consentito")
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
 # Create your views here.
 
 def controlloPassword(password):
@@ -76,12 +90,11 @@ def aggiungi_progetto(request):
     return render(request, 'aggiungi_progetto.html', context)
 
 
-
+@role_required([Cittadino.Ruolo.URBANISTA])
 def salva_bio(request):
     if request.method == 'POST':
         email = request.session.get('cittadino_email')
         cittadino = Cittadino.objects.get(email=email)
-        urbanista = Urbanista.objects.get(cittadino=cittadino)
         bio = request.POST.get('bio')
         context = {
 
@@ -90,8 +103,8 @@ def salva_bio(request):
         if not email:
             return redirect('login')
 
-        urbanista.bio = bio
-        urbanista.save()
+        cittadino.bio = bio
+        cittadino.save()
 
     return redirect("home_urbanista")
 
@@ -105,8 +118,13 @@ def homepage_cittadino(request):
         return redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
-    recensioni = Recensione.objects.filter(cittadino_id=cittadino).count()
-    votazioni = Votazione.objects.filter(cittadino=cittadino).count()
+
+    if cittadino.ruolo in ['Urbanista', 'Tecnico_Comunale']:
+        return redirect('login')
+
+
+    recensioni = Recensisce.objects.filter(cittadino_id=cittadino).count()
+    votazioni = Vota.objects.filter(cittadino=cittadino).count()
 
     context = {
         'cittadino': cittadino,
@@ -118,35 +136,31 @@ def homepage_cittadino(request):
 
     return render(request, 'homepage_cittadino.html', context)
 
-
+@role_required([Cittadino.Ruolo.URBANISTA])
 def profilo_urbanista(request):
     email = request.session.get('cittadino_email')
     if not email:
         return redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
-    urbanista = Urbanista.objects.get(cittadino=cittadino)
     context = {
-        'cittadino': cittadino,
-        'urbanista': urbanista
+        'urbanista': cittadino,
     }
     return render(request, 'profilo_urbanista.html', context)
+@role_required([Cittadino.Ruolo.URBANISTA])
 def home_urbanista(request):
     email = request.session.get('cittadino_email')
     if not email:
         return redirect('login')
 
+    urbanista = Cittadino.objects.get(email=email)
 
-    cittadino = Cittadino.objects.get(email=email)
-    urbanista = Urbanista.objects.get(cittadino=cittadino)
     lista_progetti = Progetto.objects.filter(urbanista=urbanista)
-
-    recensioni = Recensione.objects.filter(cittadino_id=cittadino).count()
-    votazioni = Votazione.objects.filter(cittadino=cittadino).count()
+    recensioni = Recensisce.objects.filter(cittadino_id=urbanista).count()
+    votazioni = Vota.objects.filter(cittadino=urbanista).count()
 
     context = {
         'lista_progetti': lista_progetti,
-        'cittadino': cittadino,
         'urbanista': urbanista,
         'recensioni': recensioni,
         'votazioni': votazioni
@@ -160,11 +174,11 @@ def registrazione(request):
     lista_municipalita = Municipalita.objects.all()
     context = {
         'lista_municipalita': lista_municipalita,
-        'ruoli': Cittadino.RUOLI,
-        'livelli': Urbanista.Livelli,
-        'qualifiche': Urbanista.QUALIFICHE_URBANISTA,
+        'ruoli': Cittadino.Ruolo.choices,
+        'livelli': Cittadino.Livelli,
+        'qualifiche': Cittadino.QUALIFICHE_URBANISTA,
         'occupazioni': Cittadino.OCCUPAZIONI,
-        'specializzazioni': TecnicoComunale.SPECIALIZZAZIONI_TECNICO
+        'specializzazioni': Cittadino.SPECIALIZZAZIONI_TECNICO
     }
 
     if request.method == 'POST':
@@ -180,6 +194,7 @@ def registrazione(request):
         notifiche_email = aggiornamentoEmail == 'on'
         hashed_password = make_password(password)
         data_nascita_str = request.POST.get('dataNascita')
+        occupazione = request.POST.get('occupazione')
 
         if not email or not password or not passwordConfermata or not nome or not cognome or not municipalita_codice_postale:
             context['error_message'] = "Tutti i campi devono essere compilati."
@@ -199,8 +214,7 @@ def registrazione(request):
 
 
 
-        elif(ruolo == 'altro'):
-            occupazione = request.POST.get('occupazione')
+        elif ruolo not in [Cittadino.Ruolo.URBANISTA, Cittadino.Ruolo.Tecnico_Comunale]:
             # Diventa True o False. In Django le checkbox di html vengono passate con 'on' se vengono spuntate
 
             # notifiche_ email = aggiornamentiEmail == 'on' è l'equivalente di:
@@ -210,47 +224,44 @@ def registrazione(request):
             #   notifiche_email = False
 
 
-            cittadino = Cittadino(nome=nome, cognome=cognome, email=email, password=hashed_password, codice_postale=municipalita, data_nascita=data_nascita_str, occupazione=occupazione, notifiche_email=notifiche_email)
+            cittadino = Cittadino(nome=nome, cognome=cognome, email=email, password=hashed_password, codice_postale=municipalita, data_nascita=data_nascita_str, notifiche_email=notifiche_email, occupazione=occupazione, ruolo='altro')
             cittadino.save()
             context['success'] = "Registrazione avvenuta con successo"
             return render(request, 'login.html', context)
 
 
 
-        elif (ruolo == 'urbanista'):
+        elif (ruolo == Cittadino.Ruolo.URBANISTA):
 
             livello = request.POST.get('livello')
             qualifica = request.POST.get('qualifica')
 
             hashed_password = make_password(password)
-            cittadino = Cittadino(nome=nome, cognome=cognome,email=email, password=hashed_password, codice_postale=municipalita,  occupazione=ruolo, data_nascita=data_nascita_str)
+            cittadino = Cittadino(nome=nome, cognome=cognome,email=email, password=hashed_password, codice_postale=municipalita,  occupazione=ruolo, data_nascita=data_nascita_str, tipo=livello, qualifica=qualifica, ruolo=Cittadino.Ruolo.URBANISTA)
             cittadino.save()
-            urbanista = Urbanista(cittadino=cittadino, tipo=livello, qualifica=qualifica)
-            urbanista.save()
             context['success'] = "Registrazione avvenuta con successo"
             return render(request, 'login.html', context)
 
-        elif(ruolo == 'tecnico_comunale'):
+        elif(ruolo == Cittadino.Ruolo.Tecnico_Comunale):
 
             specializzazione = request.POST.get('specializzazione')
             numero_matricola = request.POST.get('matricola')
             emailUfficio = request.POST.get('emailUfficio')
             telefono_ufficio = request.POST.get('telefono')
 
-            hashed_password = make_password(password)
-            cittadino = Cittadino(nome=nome, cognome=cognome,email=email, password=hashed_password, codice_postale=municipalita,  occupazione=ruolo, data_nascita=data_nascita_str)
-            cittadino.save()
-
             if not telefono_ufficio:
-                tecnico = TecnicoComunale(cittadino = cittadino,specializzazione = specializzazione, numero_matricola=numero_matricola, email_ufficio= emailUfficio)
-                tecnico.save()
+                hashed_password = make_password(password)
+                cittadino = Cittadino(nome=nome, cognome=cognome,email=email, password=hashed_password, codice_postale=municipalita,  occupazione=ruolo, data_nascita=data_nascita_str, specializzazione = specializzazione, numero_matricola=numero_matricola, email_ufficio= emailUfficio, ruolo=Cittadino.Ruolo.Tecnico_Comunale)
+                cittadino.save()
                 context['success'] = "Registrazione avvenuta con successo"
                 return render(request, 'login.html', context)
-            else:
-                tecnico = TecnicoComunale(cittadino=cittadino, specializzazione=specializzazione, numero_matricola=numero_matricola, email_ufficio=emailUfficio, telefono_ufficio=telefono_ufficio)
-                tecnico.save()
+
+            elif telefono_ufficio:
+                cittadino = Cittadino(nome=nome, cognome=cognome,email=email, password=hashed_password, codice_postale=municipalita,  occupazione=ruolo, data_nascita=data_nascita_str, specializzazione = specializzazione, numero_matricola=numero_matricola, email_ufficio= emailUfficio, telefono_ufficio=telefono_ufficio, ruolo=Cittadino.Ruolo.Tecnico_Comunale)
+                cittadino.save()
                 context['success'] = "Registrazione avvenuta con successo"
                 return render(request, 'login.html', context)
+
 
     return render(request, 'registrazione.html', context)
 
@@ -266,18 +277,36 @@ def login(request):
             cittadino = Cittadino.objects.get(email=email)  # Recupera l'istanza dell'cittadino
 
             # Verifica la password hashata
-            if check_password(password, cittadino.password) and cittadino.occupazione == 'urbanista':
+            if check_password(password, cittadino.password) and cittadino.ruolo == Cittadino.Ruolo.URBANISTA:
                 request.session['cittadino_email'] = cittadino.email
+
+                request.session.flush()
+                request.session['is_authenticated'] = True
+                request.session['ruolo'] = cittadino.ruolo  # es. 'Urbanista'
+                request.session['cittadino_email'] = cittadino.email
+
                 return redirect('home_urbanista')
 
 
 
-            elif check_password(password, cittadino.password) and cittadino.occupazione == 'tecnico_comunale':
+            elif check_password(password, cittadino.password) and cittadino.ruolo == Cittadino.Ruolo.Tecnico_Comunale:
                 request.session['cittadino_email'] = cittadino.email
+
+                request.session.flush()
+                request.session['is_authenticated'] = True
+                request.session['ruolo'] = cittadino.ruolo  # es. 'Urbanista'
+                request.session['cittadino_email'] = cittadino.email
+
                 return redirect('home_tecnico')
 
             elif check_password(password, cittadino.password) and (cittadino.occupazione == 'impiegato' or cittadino.occupazione == 'studente' or cittadino.occupazione == 'libero_professionista' or cittadino.occupazione == 'disoccupato' or cittadino.occupazione == 'pensionato' or cittadino.occupazione == 'casalinga' or cittadino.occupazione == 'altro'):
                 request.session['cittadino_email'] = cittadino.email
+
+                request.session.flush()
+                request.session['is_authenticated'] = True
+                request.session['ruolo'] = cittadino.ruolo  # es. 'Urbanista'
+                request.session['cittadino_email'] = cittadino.email
+
                 return redirect('homepage_cittadino')
 
             else:
@@ -300,15 +329,13 @@ def progetti_votabili(request):
     cittadino = Cittadino.objects.get(email=email)
     cittadino_codice = cittadino.codice_postale
 
-    if cittadino.occupazione == 'urbanista':
-        urbanista = Urbanista.objects.get(cittadino=cittadino)
+    if cittadino.ruolo == Cittadino.Ruolo.URBANISTA:
 
-        lista_progetti = Progetto.objects.filter(stato='in_votazione').exclude(urbanista=urbanista)
+        lista_progetti = Progetto.objects.filter(stato='in_votazione', codice_postale_id = cittadino_codice).exclude(urbanista=cittadino)
 
         context = {
         'lista_progetti': lista_progetti,
         'cittadino': cittadino,
-        'urbanista': urbanista
         }
 
         return render(request, 'progetti_votabili.html', context)
@@ -323,25 +350,21 @@ def progetti_votabili(request):
 
         return render(request, 'progetti_votabili.html', context)
 
-    if cittadino.occupazione == 'tecnico_comunale':
-        tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
-        lista_progetti = Progetto.objects.filter(stato='in_votazione', codice_postale_id=cittadino_codice)
+    if cittadino.ruolo == Cittadino.Ruolo.Tecnico_Comunale:
+        lista_progetti = Progetto.objects.filter(stato='in_votazione', codice_postale_id=cittadino_codice).exclude(tecnico_approvatore=cittadino)
         context = {
             'lista_progetti': lista_progetti,
             'cittadino': cittadino,
-            'tecnico': tecnico
         }
 
         return render(request, 'progetti_votabili.html', context)
 
 def profilo_urbanista_pubblico(request, email):
     email_sessione = request.session.get('cittadino_email')
-    urbanista_selezionato = get_object_or_404(Urbanista, cittadino__email=email)
+    urbanista_selezionato = get_object_or_404(Cittadino, email=email)
     cittadino = Cittadino.objects.get(email=email_sessione)
     ruolo = cittadino.occupazione
 
-    # Prova a cercare un oggetto Urbanista collegato a un Cittadino che ha quella email.
-    # Se lo trova, lo salva nella variabile urbanista_selezionato.
 
     context = {
 
@@ -349,7 +372,7 @@ def profilo_urbanista_pubblico(request, email):
         'ruolo': ruolo
     }
     return render(request, 'profilo_urbanista_pubblico.html', context)
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def home_tecnico(request):
     email = request.session.get('cittadino_email')
 
@@ -357,11 +380,10 @@ def home_tecnico(request):
         return redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
-    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
-    municipalita = tecnico.cittadino.codice_postale
+    municipalita = cittadino.codice_postale
 
-    recensioni = Recensione.objects.filter(cittadino_id=cittadino).count()
-    votazioni = Votazione.objects.filter(cittadino=cittadino).count()
+    recensioni = Recensisce.objects.filter(cittadino_id=cittadino).count()
+    votazioni = Vota.objects.filter(cittadino=cittadino).count()
 
     # Seleziona solo i progetti che:
     # - sono stati proposti da urbanisti il cui cittadino è nella stessa municipalità del tecnico
@@ -370,7 +392,7 @@ def home_tecnico(request):
 
     context = {
         'progetti': progetti_in_valutazione,
-        'cittadino': tecnico.cittadino,
+        'cittadino': cittadino,
         'recensioni': recensioni,
         'votazioni': votazioni
     }
@@ -382,16 +404,14 @@ def profilo_tecnico(request):
         return redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
-    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
 
     context = {
         'cittadino': cittadino,
-        'tecnico': tecnico
 
     }
 
     return render(request, 'profilo_tecnico.html', context)
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def valuta_progetto(request):
     email = request.session.get('cittadino_email')
     if not email:
@@ -402,14 +422,13 @@ def valuta_progetto(request):
         azione = request.POST.get('azione')
 
         cittadino = Cittadino.objects.get(email=email)
-        tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
 
 
 
         if(azione == 'approva'):
             progetto = Progetto.objects.get(ID_Progetto=progetto_id)
             progetto.stato = 'approvato'
-            progetto.tecnico_approvatore = tecnico
+            progetto.tecnico_approvatore = cittadino
             progetto.save()
 
             return redirect( 'home_tecnico')
@@ -434,14 +453,14 @@ def vota_progetto(request):
         progetto_id = request.POST.get('progetto_id')
         progetto = Progetto.objects.get(ID_Progetto=progetto_id)
 
-        esiste = Votazione.objects.filter(cittadino=cittadino,
+        esiste = Vota.objects.filter(cittadino=cittadino,
                                           progetto=progetto).exists()  # Esiste una votazione dove questo cittadino ha votato questo progetto?
 
         if not esiste:
             progetto = Progetto.objects.get(ID_Progetto=progetto_id)
             progetto.totale_voti = progetto.totale_voti + 1
             progetto.save()
-            Votazione.objects.create(cittadino=cittadino, progetto=progetto)
+            Vota.objects.create(cittadino=cittadino, progetto=progetto)
             messages.success(request, "Progetto votato con successo!")
             return redirect('progetti_votabili')
         else:
@@ -455,11 +474,10 @@ def gestione_progetti(request):
         redirect('login')
 
     cittadino = Cittadino.objects.get(email=email)
-    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
 
-    municipalita = tecnico.cittadino.codice_postale
+    municipalita = cittadino.codice_postale
 
-    progetti = Progetto.objects.filter(codice_postale_id=municipalita, stato = "in_corso", completato=False, tecnico_approvatore=tecnico)
+    progetti = Progetto.objects.filter(codice_postale_id=municipalita, stato = "in_corso", tecnico_approvatore=cittadino)
 
     context = {
             'progetti': progetti,
@@ -468,24 +486,23 @@ def gestione_progetti(request):
 
     return render(request, 'gestione_progetti.html', context)
 
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def gestione_fasi(request, progetto_id):
 
     email = request.session.get('cittadino_email')
     if not email:
         redirect('login')
 
-    cittadino = Cittadino.objects.get(email=email)
-    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
-    municipalita = tecnico.cittadino.codice_postale
-    tecnici= TecnicoComunale.objects.filter(cittadino__codice_postale_id=municipalita).exclude(cittadino__email = email)
+    tecnico = Cittadino.objects.get(email=email)
+    municipalita = tecnico.codice_postale
+    tecnici = Cittadino.objects.filter(codice_postale=municipalita, ruolo = Cittadino.Ruolo.Tecnico_Comunale).exclude(email = email)
 
     progetto_gestito = Progetto.objects.get(ID_Progetto=progetto_id)
     FasiProgettoGestito = FaseProgetto.objects.filter(progetto=progetto_gestito)
 
     context = {
         'progetto_gestito': progetto_gestito,
-        'cittadino': cittadino,
+        'cittadino': tecnico,
         'titoli_fase': FaseProgetto.FASI,
         'fasi': FasiProgettoGestito,
         'tecnici': tecnici
@@ -508,13 +525,13 @@ def gestione_fasi(request, progetto_id):
         fase_progetto = FaseProgetto(Titolo_FaseProgetto=titolo_fase, descrizione_fase=descrizione, data_inizioFase_stimata = data_inizioFaseStimata, data_fineFase_stimata = data_fineFaseStimata, data_Inizio = data_inizio, data_Fine = data_fine, note_tecniche = note_tecniche, progetto = progetto_gestito)
         fase_progetto.save()
 
-        tecnico_aggiunto = TecnicoComunale.objects.get(cittadino_id=assegna_tecnico)
+        tecnico_aggiunto = Cittadino.objects.get(email=assegna_tecnico)
         Gestisce.objects.create(fase=fase_progetto, tecnico=tecnico_aggiunto)
         return redirect('gestione_fasi', progetto_id=progetto_id)
 
     return render(request, 'gestione_fasi.html', context)
 
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def segna_fase_completata(request, fase_id):
     email = request.session.get('cittadino_email')
     if not email:
@@ -530,7 +547,7 @@ def segna_fase_completata(request, fase_id):
 
 
         return redirect('gestione_fasi', progetto_id=fase_progetto.progetto.ID_Progetto)
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def segna_progetto_completato(request, progetto_id):
         email = request.session.get('cittadino_email')
         if not email:
@@ -539,24 +556,23 @@ def segna_progetto_completato(request, progetto_id):
         if request.method == 'POST':
 
             progetto = Progetto.objects.get(ID_Progetto=progetto_id)
-            progetto.completato = True
             progetto.stato = "concluso"
             progetto.data_fine_effettiva = timezone.now().date()
             progetto.save()
             return redirect('gestione_progetti')
 
 
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def progetti_completati(request):
     email_sessione = request.session.get('cittadino_email')
     if not email_sessione:
         return redirect('login')
 
     cittadino = Cittadino.objects.get(email=email_sessione)
-    tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
 
-    municipalita = tecnico.cittadino.codice_postale
+    municipalita = cittadino.codice_postale
 
-    progetti = Progetto.objects.filter(codice_postale_id=municipalita, completato=True)
+    progetti = Progetto.objects.filter(codice_postale_id=municipalita, stato='concluso')
 
     context = {
         'progetti': progetti,
@@ -584,7 +600,7 @@ def toggle_votazione(request, progetto_id):
 
 
 
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def progetti_votabili_tecnico(request):
 
         email = request.session.get('cittadino_email')
@@ -594,18 +610,17 @@ def progetti_votabili_tecnico(request):
 
         cittadino = Cittadino.objects.get(email=email)
 
-        tecnico = TecnicoComunale.objects.get(cittadino=cittadino)
-        municipalita = tecnico.cittadino.codice_postale
+        municipalita = cittadino.codice_postale
         lista_progetti = Progetto.objects.filter(stato__in=['approvato', 'in_votazione'], codice_postale_id=municipalita)
 
         context = {
                 'lista_progetti': lista_progetti,
-                'tecnico': tecnico,
+                'tecnico': cittadino,
             }
 
         return render(request, 'progetti_votabili_tecnico.html', context)
 
-
+@role_required([Cittadino.Ruolo.Tecnico_Comunale])
 def prendi_piu_votato(request):
     email = request.session.get('cittadino_email')
     if not email:
@@ -634,7 +649,7 @@ def recensioni(request):
 
     progetti_conclusi = Progetto.objects.filter(stato='concluso', codice_postale_id=cittadino.codice_postale_id)
 
-    progetti_recensiti = Recensione.objects.filter(cittadino=cittadino, stato_recensione="recensito").values_list('progetto__ID_Progetto', flat=True) # Mi restituisce una lista di valori
+    progetti_recensiti = Recensisce.objects.filter(cittadino=cittadino, stato_recensione="recensito").values_list('progetto__ID_Progetto', flat=True) # Mi restituisce una lista di valori
 
 
     lista_progetti = progetti_conclusi.exclude(ID_Progetto__in=progetti_recensiti) # Cerco l'ID progetto in quella lista
@@ -648,6 +663,56 @@ def recensioni(request):
 
 
 
+def recensioni_pagina_urbanista(request):
+    email = request.session.get('cittadino_email')
+    if not email:
+        return redirect('login')
+
+    cittadino = Cittadino.objects.get(email=email)
+
+
+
+    progetti_conclusi = Progetto.objects.filter(stato='concluso', codice_postale_id=cittadino.codice_postale_id).exclude(urbanista = email)
+
+    progetti_recensiti = Recensisce.objects.filter(cittadino=cittadino, stato_recensione="recensito").values_list('progetto__ID_Progetto', flat=True) # Mi restituisce una lista di valori
+
+
+    lista_progetti = progetti_conclusi.exclude(ID_Progetto__in=progetti_recensiti) # Cerco l'ID progetto in quella lista
+
+    context = {
+
+        'lista_progetti': lista_progetti,
+    }
+
+    return render(request, 'recensioni.html', context)
+
+
+def recensioni_pagina_tecnico(request):
+    email = request.session.get('cittadino_email')
+    if not email:
+        return redirect('login')
+
+    cittadino = Cittadino.objects.get(email=email)
+
+    progetti_conclusi = Progetto.objects.filter(stato='concluso', codice_postale_id=cittadino.codice_postale_id).exclude(tecnico_approvatore = email)
+
+    progetti_recensiti = Recensisce.objects.filter(cittadino=cittadino, stato_recensione="recensito").values_list('progetto__ID_Progetto', flat=True) # Mi restituisce una lista di valori
+
+
+    lista_progetti = progetti_conclusi.exclude(ID_Progetto__in=progetti_recensiti) # Cerco l'ID progetto in quella lista
+
+    context = {
+
+        'lista_progetti': lista_progetti,
+    }
+
+    return render(request, 'recensioni.html', context)
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Avg
+from .models import Cittadino, Progetto, Recensisce
+
 def recensisci_progetto(request):
     if request.method == "POST":
         email = request.session.get('cittadino_email')
@@ -660,11 +725,12 @@ def recensisci_progetto(request):
         voto = int(request.POST.get('voto'))
         descrizione = request.POST.get('descrizione', '')
 
-        if Recensione.objects.filter(progetto=progetto, cittadino=cittadino).exists():
+        # Evita doppie recensioni
+        if Recensisce.objects.filter(progetto=progetto, cittadino=cittadino).exists():
             return redirect('recensioni')  # già recensito
 
-
-        nuova_recensione = Recensione.objects.create(
+        # Crea nuova recensione
+        Recensisce.objects.create(
             progetto=progetto,
             cittadino=cittadino,
             voto=voto,
@@ -672,14 +738,18 @@ def recensisci_progetto(request):
             stato_recensione="recensito"
         )
 
-
-        # Aggiorna attività del cittadino
+        # Aggiorna punteggio attività cittadino
         cittadino.punteggio_attivita += 10
         cittadino.save()
 
-        # Aggiorna valutazione media dell'urbanista del progetto
+        # Aggiorna la valutazione media dell’urbanista
         urbanista = progetto.urbanista
-        media = Recensione.objects.filter(progetto__urbanista=urbanista).aggregate(avg=Avg('voto'))['avg']
+        recensioni_urbanista = Recensisce.objects.filter(
+            progetto__urbanista=urbanista,
+            stato_recensione="recensito"
+        )
+
+        media = recensioni_urbanista.aggregate(avg=Avg('voto'))['avg']
         if media is not None:
             urbanista.valutazione_media = round(media, 2)
             urbanista.save()
@@ -688,3 +758,24 @@ def recensisci_progetto(request):
 
 
 
+from django.db import connection
+
+# def login_vulnerabile(request):
+    # error_message = None
+
+    # if request.method == "POST":
+#     email = request.POST.get("email")
+#  password = request.POST.get("password")
+
+# with connection.cursor() as cursor:
+#    query = f"SELECT * FROM SmartCity_cittadino WHERE email = '{email}' AND password = '{password}'"
+#    cursor.execute(query)
+#    row = cursor.fetchone()
+
+        #if row:
+            #request.session['cittadino_email'] = email
+            #return render(request, "homepage_cittadino.html", {"success": "Accesso riuscito!"})
+#else:
+            #error_message = "Email o password non validi."
+
+    #return render(request, "login_vulnerabile.html", {"error_message": error_message})

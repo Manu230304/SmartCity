@@ -213,14 +213,15 @@
     {% for progetto in lista_progetti %}
     <div class="card p-3">
         <h5 class="card-title">{{ progetto.nome }} - Ideato da:
-            <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.cittadino.email %}">
-                {{ progetto.urbanista.cittadino.nome }} {{ progetto.urbanista.cittadino.cognome }}
+            <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.email %}">
+                {{ progetto.urbanista.nome }} {{ progetto.urbanista.cognome }}
             </a>
         </h5>
         <p style="font-size: large" class="card-text">{{ progetto.descrizione }}</p>
         <p style="font-size: large" class="card-text"><small>Budget: €{{ progetto.budget }}</small></p>
         <p style="font-size: large" class="card-text">Possibile data inizio: {{ progetto.data_inizio }}</p>
         <p style="font-size: large" class="card-text">Possibile data fine: {{ progetto.data_fine }}</p>
+        <p style="font-size: large" class="card-text">Data Fine Effettiva: {{ progetto.data_fine_effettiva }}</p>
         <p style="font-size: large" class="card-text">Stato: {{ progetto.stato }}</p>
 
         {% if progetto.immagine %}

@@ -98,17 +98,17 @@
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Nome:</div>
-        <div class="col-sm-8 value">{{ urbanista.cittadino.nome }} {{ urbanista.cittadino.cognome }}</div> <!-- Prendi l’urbanista, poi prendi il cittadino associato, e mostra il nome di quel cittadino -->
+        <div class="col-sm-8 value">{{ urbanista.nome }} {{ urbanista.cognome }}</div> <!-- Prendi l’urbanista, poi prendi il cittadino associato, e mostra il nome di quel cittadino -->
     </div>
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Email:</div>
-        <div class="col-sm-8 value">{{ urbanista.cittadino.email }}</div>
+        <div class="col-sm-8 value">{{ urbanista.email }}</div>
     </div>
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Municipalità:</div>
-        <div class="col-sm-8 value">{{ urbanista.cittadino.codice_postale.nome }}</div>
+        <div class="col-sm-8 value">{{ urbanista.codice_postale.nome }}</div>
     </div>
 
     <div class="row mb-3">
@@ -123,7 +123,7 @@
 
     <div class="row mb-3">
         <div class="col-sm-4 label">Valutazione media:</div>
-        <div class="col-sm-8 value">{{ urbanista.valutazione_media }}</div>
+        <div class="col-sm-8 value">{{ urbanista.valutazione_media }}/5</div>
     </div>
 
      <div class="row mb-3">

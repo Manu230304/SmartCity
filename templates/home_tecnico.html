@@ -120,6 +120,14 @@
     </style>
 </head>
 <body>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Recensioni</h5>
+            <a href="{% url 'recensioni_pagina_tecnico' %}" class="btn btn-custom">Vai alle Recensioni</a>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <!-- Navbar -->
@@ -135,7 +143,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'progetti_votabili_tecnico' %}">🗳️ Progetti Approvati</a>
+                    <a class="nav-link" href="{% url 'progetti_votabili_tecnico' %}">Progetti Approvati</a>
                 </li>
 
                 <li class="nav-item">
@@ -187,6 +195,7 @@
         </div>
     </div>
 
+
     <!-- Progetti in attesa di approvazione -->
     <div class="section-title">Progetti in attesa di approvazione</div>
     {% for progetto in progetti %}
@@ -194,8 +203,8 @@
             <h5 class="card-title">{{ progetto.nome }}</h5>
             <p class="card-text">{{ progetto.descrizione }}</p>
             <h7 class="card-title">Proposto da:
-                <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.cittadino.email %}">
-                    {{ progetto.urbanista.cittadino.nome }} {{ progetto.urbanista.cittadino.cognome }}
+                <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.email %}">
+                    {{ progetto.urbanista.nome }} {{ progetto.urbanista.cognome }}
                 </a>
             </h7>
             <p class="card-text"><small>Budget: €{{ progetto.budget }}</small></p>

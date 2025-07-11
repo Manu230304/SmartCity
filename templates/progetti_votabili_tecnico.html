@@ -150,8 +150,8 @@
     {% for progetto in lista_progetti %}
     <div class="card p-3">
         <h5 class="card-title">{{ progetto.nome }} - Ideato da:
-            <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.cittadino.email %}">
-                {{ progetto.urbanista.cittadino.nome }} {{ progetto.urbanista.cittadino.cognome }}
+            <a class="nav-link" href="{% url 'profilo_urbanista_pubblico' email=progetto.urbanista.email %}">
+                {{ progetto.urbanista.nome }} {{ progetto.urbanista.cognome }}
             </a>
         </h5>
         <p style="font-size: large" class="card-text">{{ progetto.descrizione }}</p>

@@ -1,4 +1,6 @@
 from django.db import models
+
+
 from datetime import timedelta
 # Create your models here.
 
@@ -14,11 +16,10 @@ class Municipalita(models.Model):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class Cittadino(models.Model):
-    RUOLI = [
-        ('urbanista', 'Urbanista'),
-        ('tecnico_comunale', 'Tecnico Comunale'),
-        ('altro', 'Altro')
-    ]
+    class Ruolo(models.TextChoices):
+        URBANISTA = 'Urbanista'
+        Tecnico_Comunale = 'Tecnico_Comunale'
+
 
 
     OCCUPAZIONI = [
@@ -31,27 +32,10 @@ class Cittadino(models.Model):
         ('altro', 'Altro')
     ]
 
-                                                                                                               # Posso usare quindi per esempio: Cittadino.utente.email, Urbanista.utente.codice_postale ecc...
-                                                                                                                # Mettendo il related name posso anche fare Utente.cittadino ecc...
-    nome = models.CharField(max_length=70)
-    cognome = models.CharField(max_length=70)
-    email = models.EmailField(max_length=150, primary_key=True)
-    password = models.CharField(max_length=128)
-    codice_postale = models.ForeignKey(Municipalita, on_delete=models.CASCADE)
-    occupazione = models.CharField(max_length=70, choices=OCCUPAZIONI, default=OCCUPAZIONI[0])
-    data_nascita = models.DateField()
-    data_registrazione = models.DateTimeField(auto_now_add=True)
-    notifiche_email = models.BooleanField(default=False, null=True)
-    punteggio_attivita = models.IntegerField(default=0)
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-class Urbanista(models.Model):
-
     Livelli = [
-        ('junior','Junior'),
-        ('senior','Senior'),
-        ('esperto','Esperto'),
+        ('junior', 'Junior'),
+        ('senior', 'Senior'),
+        ('esperto', 'Esperto'),
 
     ]
 
@@ -69,18 +53,7 @@ class Urbanista(models.Model):
         ("esperto_politiche_abitative", "Esperto in Politiche Abitative e Sociali"),
         ("esperto_normativa", "Esperto in Normativa Urbanistica e Edilizia"),
 
-        ]
-
-    cittadino = models.OneToOneField(Cittadino, on_delete=models.CASCADE, primary_key=True, related_name='profilo_urbanista')
-    tipo = models.CharField(max_length=100, choices=Livelli)
-    qualifica = models.CharField(max_length=120, choices=QUALIFICHE_URBANISTA)
-    bio = models.TextField()
-    valutazione_media = models.FloatField(default=0)
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-class TecnicoComunale(models.Model):
+    ]
 
     SPECIALIZZAZIONI_TECNICO = [
         ("manutenzione", "Manutenzione Infrastrutturale"),
@@ -95,11 +68,33 @@ class TecnicoComunale(models.Model):
         ("emergenze", "Tecnico per l’Emergenza e Protezione Civile"),
     ]
 
-    cittadino = models.OneToOneField(Cittadino, on_delete=models.CASCADE, primary_key=True, related_name='tecnicocomunale')
-    specializzazione = models.CharField(max_length=155, choices=SPECIALIZZAZIONI_TECNICO)
-    numero_matricola = models.CharField(max_length=16)
-    email_ufficio = models.EmailField()
-    telefono_ufficio = models.CharField(max_length=20, null=True)
+
+    # Attributi Cittadino
+    nome = models.CharField(max_length=70)
+    cognome = models.CharField(max_length=70)
+    email = models.EmailField(max_length=150, primary_key=True)
+    password = models.CharField(max_length=128)
+    codice_postale = models.ForeignKey(Municipalita, on_delete=models.CASCADE)
+    occupazione = models.CharField(max_length=70, choices=OCCUPAZIONI, default=OCCUPAZIONI[0], null=True)
+    data_nascita = models.DateField()
+    data_registrazione = models.DateTimeField(auto_now_add=True)
+    notifiche_email = models.BooleanField(default=False, null=True)
+    punteggio_attivita = models.IntegerField(default=0)
+    ruolo = models.CharField(max_length=30, choices=Ruolo.choices, default="Cittadino")
+
+    #Attributi Tecnico
+    specializzazione = models.CharField(max_length=155, choices=SPECIALIZZAZIONI_TECNICO, null=True)
+    numero_matricola = models.CharField(max_length=16, null=True)
+    email_ufficio = models.EmailField(null=True)
+    telefono_ufficio = models.CharField(max_length=15, null=True)
+
+    #Attributi Urbanista
+    tipo = models.CharField(max_length=100, choices=Livelli, null=True)
+    qualifica = models.CharField(max_length=120, choices=QUALIFICHE_URBANISTA, null=True)
+    bio = models.TextField(null=True)
+    valutazione_media = models.FloatField(default=0, null=True)
+
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -123,14 +118,13 @@ class Progetto(models.Model):
     stato = models.CharField(max_length=20, choices=STATO, default='in_valutazione')
     data_pubblicazione = models.DateField(auto_now_add=True)
     data_inizio = models.DateField(null=True)
-    data_fine = models.DateField(null=True)
-    urbanista = models.ForeignKey(Urbanista, on_delete=models.CASCADE, related_name='progetti') # quindi potrei usare urbanista.progetti
+    data_fine = models.DateField(null=False)
+    urbanista = models.ForeignKey(Cittadino, on_delete=models.CASCADE, related_name='progetti_urbanista') # quindi potrei usare urbanista.progetti
     codice_postale = models.ForeignKey(Municipalita, on_delete=models.CASCADE, related_name='progetti')
     immagine = models.ImageField(upload_to='progetti/' , null=True, blank=True)
     totale_voti = models.PositiveIntegerField(default=0)
-    completato = models.BooleanField(default=False)
     data_fine_effettiva = models.DateField(default=None, null=True)
-    tecnico_approvatore = models.ForeignKey(TecnicoComunale, on_delete=models.CASCADE, related_name='progetti', default=None, null=True) # Inizialmente non abbiamo un tecnico approvato, quando viene aggiunto il progetto
+    tecnico_approvatore = models.ForeignKey(Cittadino, on_delete=models.CASCADE, related_name='progetti_tecnico_approvatore', default=None, null=True) # Inizialmente non abbiamo un tecnico approvato, quando viene aggiunto il progetto
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -164,15 +158,14 @@ class FaseProgetto(models.Model):
 
 class Gestisce(models.Model):
     fase = models.ForeignKey(FaseProgetto, on_delete=models.CASCADE, related_name='gestioni') # fase.gestioni
-    tecnico = models.ForeignKey(TecnicoComunale, on_delete=models.CASCADE, related_name='gestioni') # tecnico.gestioni
+    tecnico = models.ForeignKey(Cittadino, on_delete=models.CASCADE, related_name='gestioni') # tecnico.gestioni
 
-    class Unicita:
-        unique_together = ('fase', 'tecnico')    # Garantisce che per ogni fase di progetto un tecnico possa essere associato una sola volta,
-                                                 # evitando duplicati nella tabella di gestione (relazione molti-a-molti tramite modello esplicito)
+    class Meta:
+        unique_together = ('fase', 'tecnico')    
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-class Votazione(models.Model):
+class Vota(models.Model):
     ID_Votazione = models.AutoField(primary_key=True)
     cittadino = models.ForeignKey(Cittadino, on_delete=models.CASCADE, related_name='votazioni') # cittadino.votazioni
     progetto = models.ForeignKey(Progetto, on_delete=models.CASCADE, related_name='votazioni') # progetto.votazioni
@@ -180,7 +173,7 @@ class Votazione(models.Model):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-class Recensione(models.Model):
+class Recensisce(models.Model):
 
     STATO_RECENSIONE = [
         ("recensito", "Recensito"),
@@ -199,13 +192,6 @@ class Recensione(models.Model):
 
 
 class Badge(models.Model):
-
-    STATO_RECENSIONE = [
-        ("recensito", "Recensito"),
-        ("non_recensito", "Non Recensito"),
-
-    ]
-
 
     ID_Badge = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=255)
