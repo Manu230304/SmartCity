@@ -6,7 +6,7 @@ Il sistema presenta un elenco dettagliato dei progetti urbanistici, suddivisi pe
 
 &nbsp;**Indice**
 
-- [Modello Entità/Relazione](https://www.google.com/search?q=%23modello-entit%C3%A0relazione)
+- [Modello Entità/Relazione](#modello-entitàrelazione)
 - [Funzionalità Principali](https://www.google.com/search?q=%23funzionalit%C3%A0-principali)
 - [Tecnologie Utilizzate](https://www.google.com/search?q=%23tecnologie-utilizzate)
 - [Installazione](https://www.google.com/search?q=%23installazione)
